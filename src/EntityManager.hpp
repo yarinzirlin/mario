@@ -15,12 +15,17 @@ class EntityManager {
   EntityVec m_toAdd;
   size_t m_totalEntities = 0;
   bool m_playerCreated = false;
-  std::shared_ptr<Entity> addEntity(std::shared_ptr<Entity> entity);
 
 public:
   EntityManager() {}
   void update();
-  std::shared_ptr<Entity> addEntity(const std::string &tag);
+  template <typename T> std::shared_ptr<T> addEntity() {
+    static_assert(std::is_base_of<Entity, T>::value,
+                  "T must be derived from Entity");
+    auto e = std::shared_ptr<T>(new T(m_totalEntities++));
+    m_toAdd.push_back(e);
+    return e;
+  }
   std::shared_ptr<Player> addPlayer();
   EntityVec &getEntities();
   EntityVec &getEntities(const std::string &tag);

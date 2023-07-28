@@ -1,24 +1,11 @@
 #include "EntityManager.hpp"
 #include <iostream>
 
-// Todo make this use templates instead of "Entity"
-std::shared_ptr<Entity> EntityManager::addEntity(const std::string &tag) {
-  auto e = std::shared_ptr<Entity>(new Entity(tag, m_totalEntities++));
-  return addEntity(e);
-}
-std::shared_ptr<Entity>
-EntityManager::addEntity(std::shared_ptr<Entity> entity) {
-  m_toAdd.push_back(entity);
-  return entity;
-}
-
 std::shared_ptr<Player> EntityManager::addPlayer() {
   if (m_playerCreated) {
     return nullptr;
   }
-  auto player = std::shared_ptr<Player>(new Player(m_totalEntities++));
-
-  addEntity(player);
+  auto player = addEntity<Player>();
 
   return player;
 }
