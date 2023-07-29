@@ -66,7 +66,6 @@ void Game::run() {
 
 void Game::sRender() {
   m_window->clear();
-  // m_window->draw(m_backgroundSprite);
   MapLayer layerZero(map, 0);
   MapLayer layerOne(map, 1);
   m_window->draw(layerZero);
