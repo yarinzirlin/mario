@@ -7,6 +7,9 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
+
+#define PORTAL_COOLDOWN_TICKS 60
+
 class Game {
   std::shared_ptr<sf::RenderWindow> m_window;
   std::shared_ptr<EntityManager> m_entities;
@@ -14,12 +17,12 @@ class Game {
   std::shared_ptr<StandbyPortal> m_sbportal;
   sf::Texture m_backgroundTexture;
   sf::Sprite m_backgroundSprite;
-  bool m_paused;
-  bool m_running;
-  unsigned int m_lastPortalSwitch;
-  unsigned int m_lastPortalFired;
+  bool m_paused = false;
+  bool m_running = false;
+  unsigned int m_lastPortalSwitch = 0;
+  unsigned int m_lastPortalFired = 0;
 
-  unsigned int m_currentFrame;
+  unsigned int m_currentFrame = 0;
 
   void sMovement();
   void sUserInput(sf::Event event);

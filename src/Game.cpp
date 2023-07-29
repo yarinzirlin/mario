@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "Entity.hpp"
+#include "SFMLOrthogonalLayer.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -9,14 +10,15 @@
 #include <SFML/Window/VideoMode.hpp>
 #include <iostream>
 #include <memory>
+#include <tmxlite/Map.hpp>
 
 #define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 5
 #define FRAMERATE_LIMIT 120
-#define PORTAL_VELOCITY 25
+#define PORTAL_VELOCITY 10
 
 Game::Game() {
   m_entities = std::make_shared<EntityManager>();
-  m_window = std::make_shared<sf::RenderWindow>(sf::VideoMode(1280, 1024),
+  m_window = std::make_shared<sf::RenderWindow>(sf::VideoMode(1920, 1080),
                                                 "Portal 2D");
   m_paused = true;
   m_running = false;
@@ -29,21 +31,23 @@ void Game::init() {
   m_paused = false;
   m_running = true;
   m_currentFrame = 0;
-  m_window->create(sf::VideoMode(1280, 1024), "Portal 2D");
+  m_window->create(sf::VideoMode(1920, 1080), "Portal 2D");
   m_window->setFramerateLimit(FRAMERATE_LIMIT);
   m_currentFrame = 0;
 
-  m_backgroundTexture.loadFromFile("resources/backgrounds/4.png");
-  m_backgroundSprite.setTexture(m_backgroundTexture);
-  m_backgroundSprite.setScale(
-      m_window->getSize().x / m_backgroundSprite.getLocalBounds().width,
-      m_window->getSize().y / m_backgroundSprite.getLocalBounds().height);
+  // m_backgroundTexture.loadFromFile("resources/backgrounds/4.png");
+  // m_backgroundSprite.setTexture(m_backgroundTexture);
+  // m_backgroundSprite.setScale(
+  //     m_window->getSize().x / m_backgroundSprite.getLocalBounds().width,
+  //     m_window->getSize().y / m_backgroundSprite.getLocalBounds().height);
 
   spawnPlayer();
   std::cout << "[*] Initialization finished" << std::endl;
 }
 
+tmx::Map map;
 void Game::run() {
+  map.load("assets/maps/map0.tmx");
   while (m_window->isOpen()) {
     m_entities->update();
     sf::Event event;
@@ -62,7 +66,11 @@ void Game::run() {
 
 void Game::sRender() {
   m_window->clear();
-  m_window->draw(m_backgroundSprite);
+  // m_window->draw(m_backgroundSprite);
+  MapLayer layerZero(map, 0);
+  MapLayer layerOne(map, 1);
+  m_window->draw(layerZero);
+  m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
     e->sprite().setPosition(e->cTransform->pos.x, e->cTransform->pos.y);
     e->sprite().setRotation(e->cTransform->angle);
@@ -143,8 +151,9 @@ void Game::updateStandbyPortal() {
 void Game::updateMidairPortals() {
   for (auto e : m_entities->getEntities("midair_portal")) {
     auto p = std::dynamic_pointer_cast<MidairPortal>(e);
-    if (p->GetLastPhaseChange() + PhaseDuration >= m_currentFrame) {
-      p->NextPhase();
+
+    if (p->GetLastPhaseChange() + PhaseDuration < m_currentFrame) {
+      p->NextPhase(m_currentFrame);
     }
   }
 }
@@ -157,10 +166,19 @@ void Game::spawnPlayer() {
 }
 
 void Game::firePortal() {
+  if (m_lastPortalFired + PORTAL_COOLDOWN_TICKS > m_currentFrame) {
+    return;
+  }
+  m_lastPortalFired = m_currentFrame;
   auto portal = m_entities->addEntity<MidairPortal>();
   portal->cTransform->pos = m_sbportal->cTransform->pos;
   portal->cTransform->velocity = Vec2(PORTAL_VELOCITY, 0);
+  if (portal->GetPortalColor() != m_sbportal->GetPortalColor()) {
+    portal->AlternateColor();
+  }
+
   if (m_player->cTransform->flipped) {
     portal->cTransform->velocity *= -1;
   }
+  portal->NextPhase(m_currentFrame);
 }
