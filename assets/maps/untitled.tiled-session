@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "sky.tsx",
+    "activeFile": "map0.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -22,7 +22,7 @@
         },
         "map0.tmx": {
             "scale": 0.2815364583333333,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 960.7991860142448,
                 "y": 529.2387383220795
@@ -49,8 +49,8 @@
     "recentFiles": [
         "basic.tsx",
         "example.tmx",
-        "map0.tmx",
-        "sky.tsx"
+        "sky.tsx",
+        "map0.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

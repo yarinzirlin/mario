@@ -11,6 +11,8 @@
 #include <iostream>
 #include <memory>
 #include <tmxlite/Map.hpp>
+#include <tmxlite/ObjectGroup.hpp>
+#include <tmxlite/TileLayer.hpp>
 
 #define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 5
 #define FRAMERATE_LIMIT 120
@@ -46,8 +48,10 @@ void Game::init() {
 }
 
 tmx::Map map;
+#define COLLISION_LAYER "Collision"
 void Game::run() {
   map.load("assets/maps/map0.tmx");
+
   while (m_window->isOpen()) {
     m_entities->update();
     sf::Event event;
@@ -86,7 +90,39 @@ void Game::sRender() {
   m_window->display();
 }
 
-void Game::sCollision() {}
+void Game::sCollision() {
+  // Does entity collide with another?
+  for (auto e1 : m_entities->getEntities()) {
+    for (auto e2 : m_entities->getEntities()) {
+      if (e1 == e2)
+        continue;
+      auto bb1 = e1->bb();
+      auto bb2 = e2->bb();
+      if (bb1.intersects(bb2)) {
+        handleEntitiesCollision(e1, e2);
+      }
+    }
+    const auto &layers = map.getLayers();
+    for (const auto &layer : layers) {
+      if (layer->getName() != COLLISION_LAYER)
+        continue;
+    }
+  }
+  // Does entity collide with map?
+}
+bool checkCollision(const sf::FloatRect &bb, const tmx::Layer &collisionLayer) {
+  for (const auto &obj :
+       collisionLayer.getLayerAs<tmx::ObjectGroup>().getObjects()) {
+    auto objAABB = obj.getAABB();
+    sf::FloatRect objectBoundingBox(objAABB.left, objAABB.top, objAABB.width,
+                                    objAABB.height);
+  }
+
+  return false; // No collision
+}
+bool Game::aabbCollisionCheck(BoundingBox &first, BoundingBox &second) {
+  return first.CollidesWith(second);
+}
 
 void Game::sUserInput(sf::Event event) {
   switch (event.key.code) {

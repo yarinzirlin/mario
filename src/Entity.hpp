@@ -1,6 +1,7 @@
 #ifndef PORTAL2D_ENTITY_H_
 #define PORTAL2D_ENTITY_H_
 
+#include "BoundingBox.hpp"
 #include "Components.hpp"
 #include "Vec2.hpp"
 #include <SFML/Graphics/Rect.hpp>
@@ -17,6 +18,10 @@ class Entity {
   friend class EntityManager;
   const size_t m_id = 0;
   const std::string m_tag = "Default";
+  float width() { return m_sprite.getLocalBounds().width; }
+  float height() { return m_sprite.getLocalBounds().height; }
+  float top() { return m_sprite.getLocalBounds().top; }
+  float left() { return m_sprite.getLocalBounds().left; }
   bool m_alive = true;
 
 protected:
@@ -32,6 +37,7 @@ public:
   const std::string &tag() { return m_tag; }
   int id() { return m_id; }
   sf::Sprite &sprite() { return m_sprite; }
+  sf::FloatRect bb() { return m_sprite.getGlobalBounds(); }
   virtual ~Entity(){};
 };
 

@@ -7,6 +7,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
+#include <tmxlite/Layer.hpp>
 
 #define PORTAL_COOLDOWN_TICKS 60
 
@@ -17,6 +18,7 @@ class Game {
   std::shared_ptr<StandbyPortal> m_sbportal;
   sf::Texture m_backgroundTexture;
   sf::Sprite m_backgroundSprite;
+  const std::unique_ptr<tmx::Layer> m_collisionLayer;
   bool m_paused = false;
   bool m_running = false;
   unsigned int m_lastPortalSwitch = 0;
@@ -32,6 +34,9 @@ class Game {
   void updateStandbyPortal();
   void updateMidairPortals();
   void firePortal();
+  bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
+  void handleEntitiesCollision(std::shared_ptr<Entity> e1,
+                               std::shared_ptr<Entity> e2);
 
   void init();
 
