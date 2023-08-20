@@ -3,6 +3,7 @@
 #include "SFMLOrthogonalLayer.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <SFML/Window/Event.hpp>
@@ -62,12 +63,12 @@ void Game::run() {
       }
       sUserInput(event);
     }
+    sMovement();
     const auto &layers = map.getLayers();
     for (const auto &layer : layers) {
       if (layer->getName() == COLLISION_LAYER)
         sCollision(layer);
     }
-    sMovement();
     sRender();
     m_currentFrame++;
   }
@@ -80,23 +81,37 @@ void Game::sRender() {
   m_window->draw(layerZero);
   m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
-    e->sprite().setPosition(e->cTransform->pos.x, e->cTransform->pos.y);
-    e->sprite().setRotation(e->cTransform->angle);
+    e->sprite().setPosition(e->transform_->pos.x, e->transform_->pos.y);
+    e->sprite().setRotation(e->transform_->angle);
 
     // Set flip state
-    if (e->cTransform->flipped && e->sprite().getScale().x >= 0.f) {
+    if (e->transform_->flipped && e->sprite().getScale().x >= 0.f) {
       e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
-    } else if (!e->cTransform->flipped && e->sprite().getScale().x < 0.f) {
+    } else if (!e->transform_->flipped && e->sprite().getScale().x < 0.f) {
       e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
     }
-
+    #if DEBUG 
+    renderEntityOutline(e);
+    #endif
     m_window->draw(e->sprite());
   }
   m_window->display();
 }
 
-void Game::sCollision(std::unique_ptr<tmx::Layer> &collisionLayer) {
+void Game::renderEntityOutline(std::shared_ptr<Entity> e) {
+      sf::RectangleShape outline;
+      outline.setPosition(e->bb().left, e->bb().top);
+      outline.setSize(sf::Vector2f(e->bb().width, e->bb().height));
+      outline.setFillColor(sf::Color::Transparent);
+      outline.setOutlineColor(sf::Color::Black);
+      outline.setOutlineThickness(1.0f);
+      m_window->draw(outline);
+}
+
+void Game::sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer) {
   // Does entity collide with another?
+  const auto & collisionObjectGroup = collisionLayer->getLayerAs<tmx::ObjectGroup>();
+
   for (auto e1 : m_entities->getEntities()) {
     for (auto e2 : m_entities->getEntities()) {
       if (e1 == e2)
@@ -107,21 +122,43 @@ void Game::sCollision(std::unique_ptr<tmx::Layer> &collisionLayer) {
         handleEntitiesCollision(e1, e2);
       }
     }
-    std::unique_ptr<tmx::Layer> collisionLayer;
+    tmx::Object collider;
+    if (checkCollision(e1->bb(), collisionObjectGroup, collider)) {
+      handleEntityCollisionWithMap(e1, collider);
+    }
   }
   // Does entity collide with map?
 }
 
-bool checkCollision(const sf::FloatRect &bb, const tmx::Layer &collisionLayer) {
+bool Game::checkCollision(const sf::FloatRect &bb, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject) {
   for (const auto &obj :
-       collisionLayer.getLayerAs<tmx::ObjectGroup>().getObjects()) {
+       collisionLayer.getObjects()) {
     auto objAABB = obj.getAABB();
     sf::FloatRect objectBoundingBox(objAABB.left, objAABB.top, objAABB.width,
                                     objAABB.height);
+    if (objectBoundingBox.intersects(bb)) {
+      outCollidingObject = obj;
+      return true;
+    } 
   }
 
   return false; // No collision
 }
+
+void Game::handleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject) {
+  #if DEBUG
+    std::cout << entity->tag() << " is colliding with " << collidingObject.getPosition() << std::endl;
+  #endif
+}
+
+void Game::handleEntitiesCollision(std::shared_ptr<Entity> e1,
+                               std::shared_ptr<Entity> e2) {
+  #if DEBUG
+    if (e1->tag() != "standby_portal" && e2->tag() != "standby_portal") {
+       std::cout << e1->tag() << " is colliding with " << e2->tag() << std::endl; 
+    }
+  #endif                       
+                               }
 bool Game::aabbCollisionCheck(BoundingBox &first, BoundingBox &second) {
   return first.CollidesWith(second);
 }
@@ -150,22 +187,25 @@ void Game::sUserInput(sf::Event event) {
 
 void Game::sMovement() {
   if (m_player->cInput->right) {
-    m_player->cTransform->velocity.x = DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
-    m_player->cTransform->flipped = false;
+    m_player->transform_->velocity.x = DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
+    m_player->transform_->flipped = false;
   }
   if (m_player->cInput->left) {
-    m_player->cTransform->velocity.x = -DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
-    m_player->cTransform->flipped = true;
+    m_player->transform_->velocity.x = -DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
+    m_player->transform_->flipped = true;
   }
   if (!m_player->cInput->left && !m_player->cInput->right)
-    m_player->cTransform->velocity.x = 0;
+    m_player->transform_->velocity.x = 0;
 
   if (m_player->cInput->fire) {
     firePortal();
   }
 
   for (auto e : m_entities->getEntities()) {
-    e->cTransform->pos += e->cTransform->velocity;
+    e->transform_->pos += e->transform_->velocity;
+    if (e->affected_by_gravity()) {
+
+    }
   }
   updateStandbyPortal();
   updateMidairPortals();
@@ -173,11 +213,11 @@ void Game::sMovement() {
 
 void Game::updateStandbyPortal() {
   int x_offset = 45;
-  if (m_player->cTransform->flipped) {
+  if (m_player->transform_->flipped) {
     x_offset *= -1;
     x_offset += 5;
   }
-  m_sbportal->cTransform->pos = m_player->cTransform->pos + Vec2(x_offset, 0);
+  m_sbportal->transform_->pos = m_player->transform_->pos + Vec2(x_offset, 0);
   if (m_player->cInput->switchPortal &&
       m_currentFrame > m_lastPortalSwitch + FRAMERATE_LIMIT / 10) {
     m_lastPortalSwitch = m_currentFrame;
@@ -189,7 +229,7 @@ void Game::updateMidairPortals() {
   for (auto e : m_entities->getEntities("midair_portal")) {
     auto p = std::dynamic_pointer_cast<MidairPortal>(e);
 
-    if (p->GetLastPhaseChange() + PhaseDuration < m_currentFrame) {
+    if (p->last_phase_change() + PhaseDuration < m_currentFrame) {
       p->NextPhase(m_currentFrame);
     }
   }
@@ -197,9 +237,9 @@ void Game::updateMidairPortals() {
 
 void Game::spawnPlayer() {
   m_player = m_entities->addPlayer();
-  m_player->cTransform->pos = Vec2(500, 500);
+  m_player->transform_->pos = Vec2(500, 500);
   m_sbportal = m_entities->addEntity<StandbyPortal>();
-  m_sbportal->cTransform->pos = Vec2(510, 500);
+  m_sbportal->transform_->pos = Vec2(510, 500);
 }
 
 void Game::firePortal() {
@@ -208,14 +248,14 @@ void Game::firePortal() {
   }
   m_lastPortalFired = m_currentFrame;
   auto portal = m_entities->addEntity<MidairPortal>();
-  portal->cTransform->pos = m_sbportal->cTransform->pos;
-  portal->cTransform->velocity = Vec2(PORTAL_VELOCITY, 0);
-  if (portal->GetPortalColor() != m_sbportal->GetPortalColor()) {
+  portal->transform_->pos = m_sbportal->transform_->pos;
+  portal->transform_->velocity = Vec2(PORTAL_VELOCITY, 0);
+  if (portal->portal_color() != m_sbportal->portal_color()) {
     portal->AlternateColor();
   }
 
-  if (m_player->cTransform->flipped) {
-    portal->cTransform->velocity *= -1;
+  if (m_player->transform_->flipped) {
+    portal->transform_->velocity *= -1;
   }
   portal->NextPhase(m_currentFrame);
 }

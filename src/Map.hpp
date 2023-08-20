@@ -1,7 +1,7 @@
 #ifndef PORTAL2D_MAP_H_
 #define PORTAL2D_MAP_H_
 
-#include <Vec2.hpp>
+#include "Vec2.hpp"
 #include <tmxlite/Map.hpp>
 class Map {
   tmx::Map m_map;

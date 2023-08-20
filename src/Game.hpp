@@ -8,6 +8,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
 #include <tmxlite/Layer.hpp>
+#include <tmxlite/Object.hpp>
 
 #define PORTAL_COOLDOWN_TICKS 60
 
@@ -28,7 +29,8 @@ class Game {
   void sMovement();
   void sUserInput(sf::Event event);
   void sRender();
-  void sCollision(std::unique_ptr<tmx::Layer> &collisionLayer);
+  void renderEntityOutline(std::shared_ptr<Entity> e);
+  void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer);
   void spawnPlayer();
   void updateStandbyPortal();
   void updateMidairPortals();
@@ -36,7 +38,8 @@ class Game {
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
   void handleEntitiesCollision(std::shared_ptr<Entity> e1,
                                std::shared_ptr<Entity> e2);
-
+bool checkCollision(const sf::FloatRect &bb, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject);
+void handleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject);
   void init();
 
 public:
