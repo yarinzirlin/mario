@@ -10,6 +10,7 @@
 #include <SFML/Window/VideoMode.hpp>
 #include <iostream>
 #include <memory>
+#include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/ObjectGroup.hpp>
 #include <tmxlite/TileLayer.hpp>
@@ -61,8 +62,12 @@ void Game::run() {
       }
       sUserInput(event);
     }
+    const auto &layers = map.getLayers();
+    for (const auto &layer : layers) {
+      if (layer->getName() == COLLISION_LAYER)
+        sCollision(layer);
+    }
     sMovement();
-    sCollision();
     sRender();
     m_currentFrame++;
   }
@@ -90,7 +95,7 @@ void Game::sRender() {
   m_window->display();
 }
 
-void Game::sCollision() {
+void Game::sCollision(std::unique_ptr<tmx::Layer> &collisionLayer) {
   // Does entity collide with another?
   for (auto e1 : m_entities->getEntities()) {
     for (auto e2 : m_entities->getEntities()) {
@@ -102,14 +107,11 @@ void Game::sCollision() {
         handleEntitiesCollision(e1, e2);
       }
     }
-    const auto &layers = map.getLayers();
-    for (const auto &layer : layers) {
-      if (layer->getName() != COLLISION_LAYER)
-        continue;
-    }
+    std::unique_ptr<tmx::Layer> collisionLayer;
   }
   // Does entity collide with map?
 }
+
 bool checkCollision(const sf::FloatRect &bb, const tmx::Layer &collisionLayer) {
   for (const auto &obj :
        collisionLayer.getLayerAs<tmx::ObjectGroup>().getObjects()) {

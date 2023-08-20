@@ -18,7 +18,6 @@ class Game {
   std::shared_ptr<StandbyPortal> m_sbportal;
   sf::Texture m_backgroundTexture;
   sf::Sprite m_backgroundSprite;
-  const std::unique_ptr<tmx::Layer> m_collisionLayer;
   bool m_paused = false;
   bool m_running = false;
   unsigned int m_lastPortalSwitch = 0;
@@ -29,7 +28,7 @@ class Game {
   void sMovement();
   void sUserInput(sf::Event event);
   void sRender();
-  void sCollision();
+  void sCollision(std::unique_ptr<tmx::Layer> &collisionLayer);
   void spawnPlayer();
   void updateStandbyPortal();
   void updateMidairPortals();
