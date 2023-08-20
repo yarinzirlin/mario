@@ -16,7 +16,7 @@ class Game {
   std::shared_ptr<sf::RenderWindow> m_window;
   std::shared_ptr<EntityManager> m_entities;
   std::shared_ptr<Player> m_player;
-  std::shared_ptr<StandbyPortal> m_sbportal;
+  std::shared_ptr<StandbyPortal> sbportal_;
   sf::Texture m_backgroundTexture;
   sf::Sprite m_backgroundSprite;
   bool m_paused = false;
@@ -32,8 +32,8 @@ class Game {
   void RenderEntityOutline(std::shared_ptr<Entity> e);
   void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer);
   void SpawnPlayer();
-  void updateStandbyPortal();
-  void updateMidairPortals();
+  void UpdateStandbyPortal();
+  void UpdateMidairPortals();
   void firePortal();
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
   void HandleEntitiesCollision(std::shared_ptr<Entity> e1,

@@ -83,13 +83,13 @@ void Game::sRender() {
   m_window->draw(layerZero);
   m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
-    e->sprite().setPosition(e->transform_->pos.x, e->transform_->pos.y);
-    e->sprite().setRotation(e->transform_->angle);
+    e->sprite().setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
+    e->sprite().setRotation(e->transform_->angle_);
 
     // Set flip state
-    if (e->transform_->flipped && e->sprite().getScale().x >= 0.f) {
+    if (e->transform_->flipped_ && e->sprite().getScale().x >= 0.f) {
       e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
-    } else if (!e->transform_->flipped && e->sprite().getScale().x < 0.f) {
+    } else if (!e->transform_->flipped_ && e->sprite().getScale().x < 0.f) {
       e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
     }
     #if DEBUG 
@@ -152,8 +152,8 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, co
   DEBUGLOG("player ground: " << entity->bb().top + entity->bb().height)
   if (collidingObject.getPosition().y <= entity->bb().top + entity->bb().height) {
     DEBUGLOG("Collision with ground detected")
-    entity->transform_->pos.y = collidingObject.getAABB().top - entity->bb().height;
-    entity->transform_->velocity.y = 0;
+    entity->transform_->pos_.y = collidingObject.getAABB().top - entity->bb().height;
+    entity->transform_->velocity_.y = 0;
     entity->set_midair(false);
   } else {
     entity->set_midair(true);
@@ -170,19 +170,19 @@ void Game::HandleEntitiesCollision(std::shared_ptr<Entity> e1,
 void Game::sUserInput(sf::Event event) {
   switch (event.key.code) {
   case sf::Keyboard::Left:
-    m_player->cInput->left = event.type == sf::Event::KeyPressed;
+    m_player->cInput->left_ = event.type == sf::Event::KeyPressed;
     break;
   case sf::Keyboard::Right:
-    m_player->cInput->right = event.type == sf::Event::KeyPressed;
+    m_player->cInput->right_ = event.type == sf::Event::KeyPressed;
     break;
   case sf::Keyboard::Up:
-    m_player->cInput->up = event.type == sf::Event::KeyPressed;
+    m_player->cInput->up_ = event.type == sf::Event::KeyPressed;
     break;
   case sf::Keyboard::F:
-    m_player->cInput->fire = event.type == sf::Event::KeyPressed;
+    m_player->cInput->fire_ = event.type == sf::Event::KeyPressed;
     break;
   case sf::Keyboard::C:
-    m_player->cInput->switchPortal = event.type == sf::Event::KeyPressed;
+    m_player->cInput->switch_portal_ = event.type == sf::Event::KeyPressed;
     break;
   defualt:
     break;
@@ -190,46 +190,46 @@ void Game::sUserInput(sf::Event event) {
 }
 
 void Game::sMovement() {
-  if (m_player->cInput->right) {
-    m_player->transform_->velocity.x = DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
-    m_player->transform_->flipped = false;
+  if (m_player->cInput->right_) {
+    m_player->transform_->velocity_.x = DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
+    m_player->transform_->flipped_ = false;
   }
-  if (m_player->cInput->left) {
-    m_player->transform_->velocity.x = -DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
-    m_player->transform_->flipped = true;
+  if (m_player->cInput->left_) {
+    m_player->transform_->velocity_.x = -DEFAULT_PLAYER_HORIZONTAL_VELOCITY;
+    m_player->transform_->flipped_ = true;
   }
-  if (!m_player->cInput->left && !m_player->cInput->right)
-    m_player->transform_->velocity.x = 0;
+  if (!m_player->cInput->left_ && !m_player->cInput->right_)
+    m_player->transform_->velocity_.x = 0;
 
-  if (m_player->cInput->fire) {
+  if (m_player->cInput->fire_) {
     firePortal();
   }
 
   for (auto e : m_entities->getEntities()) {
-    e->transform_->pos += e->transform_->velocity;
+    e->transform_->pos_ += e->transform_->velocity_;
     if (e->affected_by_gravity() && e->midair()) {
-      e->transform_->velocity.y += GRAVITY_ACCELERATION;
+      e->transform_->velocity_.y += GRAVITY_ACCELERATION;
     }
   }
-  updateStandbyPortal();
-  updateMidairPortals();
+  UpdateStandbyPortal();
+  UpdateMidairPortals();
 }
 
-void Game::updateStandbyPortal() {
-  int x_offset = m_player->bb().width + m_sbportal->bb().width / 2.25f;
-  if (m_player->transform_->flipped) {
+void Game::UpdateStandbyPortal() {
+  int x_offset = m_player->bb().width + sbportal_->bb().width / 2.25f;
+  if (m_player->transform_->flipped_) {
     x_offset *= -1;
-    // x_offset += 5;
   }
-  m_sbportal->transform_->pos = m_player->transform_->pos + Vec2(x_offset, m_player->bb().height / 2.f);
-  if (m_player->cInput->switchPortal &&
+  sbportal_->transform_->flipped_ = m_player->transform_->flipped_;
+  sbportal_->transform_->pos_ = m_player->transform_->pos_ + Vec2(x_offset, m_player->bb().height / 2.f);
+  if (m_player->cInput->switch_portal_ &&
       m_currentFrame > m_lastPortalSwitch + FRAMERATE_LIMIT / 10) {
     m_lastPortalSwitch = m_currentFrame;
-    m_sbportal->AlternateColor();
+    sbportal_->AlternateColor();
   }
 }
 
-void Game::updateMidairPortals() {
+void Game::UpdateMidairPortals() {
   for (auto e : m_entities->getEntities("midair_portal")) {
     auto p = std::dynamic_pointer_cast<MidairPortal>(e);
 
@@ -241,9 +241,9 @@ void Game::updateMidairPortals() {
 
 void Game::SpawnPlayer() {
   m_player = m_entities->addPlayer();
-  m_player->transform_->pos = Vec2(500, 500);
-  m_sbportal = m_entities->addEntity<StandbyPortal>();
-  m_sbportal->transform_->pos = Vec2(510, 500);
+  m_player->transform_->pos_ = Vec2(500, 500);
+  sbportal_ = m_entities->addEntity<StandbyPortal>();
+  sbportal_->transform_->pos_ = Vec2(510, 500);
 }
 
 void Game::firePortal() {
@@ -252,14 +252,14 @@ void Game::firePortal() {
   }
   m_lastPortalFired = m_currentFrame;
   auto portal = m_entities->addEntity<MidairPortal>();
-  portal->transform_->pos = m_sbportal->transform_->pos;
-  portal->transform_->velocity = Vec2(PORTAL_VELOCITY, 0);
-  if (portal->portal_color() != m_sbportal->portal_color()) {
+  portal->transform_->pos_ = sbportal_->transform_->pos_;
+  portal->transform_->velocity_ = Vec2(PORTAL_VELOCITY, 0);
+  if (portal->portal_color() != sbportal_->portal_color()) {
     portal->AlternateColor();
   }
 
-  if (m_player->transform_->flipped) {
-    portal->transform_->velocity *= -1;
+  if (m_player->transform_->flipped_) {
+    portal->transform_->velocity_ *= -1;
   }
   portal->NextPhase(m_currentFrame);
 }
