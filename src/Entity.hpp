@@ -4,6 +4,7 @@
 #include "BoundingBox.hpp"
 #include "Components.hpp"
 #include "Vec2.hpp"
+#include "Utils.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -31,6 +32,7 @@ protected:
   sf::Texture texture_;
   sf::Sprite sprite_;
   bool affected_by_gravity_ = false;
+  bool midair_ = true;
 
 public:
   std::shared_ptr<CTransform> transform_;
@@ -40,6 +42,8 @@ public:
   sf::Sprite &sprite() { return sprite_; }
   sf::FloatRect bb() { return sprite_.getGlobalBounds(); }
   bool affected_by_gravity() { return affected_by_gravity_; }
+  bool midair() { return midair_; }
+  void set_midair(bool midair) { DEBUGLOG("set " << tag() << "midair to " << midair) midair_ = midair; }
   virtual ~Entity(){};
 };
 
@@ -49,8 +53,8 @@ class Player : public Entity {
     texture_.loadFromFile("assets/player/chell.png");
     sprite_.setTexture(texture_);
     sprite_.setScale(0.25f, 0.25f);
-    sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
-                       sprite_.getLocalBounds().height / 2.0f);
+    // sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
+    //                    sprite_.getLocalBounds().height / 2.0f);
     cInput = std::make_shared<CInput>();
     affected_by_gravity_ = true;
   }
@@ -65,8 +69,8 @@ const std::string PortalsBasePath = "assets/portals/";
 class StandbyPortal : public Entity {
   friend class EntityManager;
   PortalColor portal_color_ = INIT_PORTAL_COLOR;
-  const Vec2 resource_pos_ = Vec2(212, 85);
-  const Vec2 resource_size_ = Vec2(25, 25);
+  const Vec2 resource_pos_ = Vec2(213, 89);
+  const Vec2 resource_size_ = Vec2(19, 19);
   sf::Texture alternate_texture_;
 
   StandbyPortal(size_t id) : Entity("standby_portal", id) {

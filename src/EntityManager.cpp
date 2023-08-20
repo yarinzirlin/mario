@@ -1,4 +1,5 @@
 #include "EntityManager.hpp"
+#include "Utils.hpp"
 #include <iostream>
 
 std::shared_ptr<Player> EntityManager::addPlayer() {
@@ -11,7 +12,7 @@ std::shared_ptr<Player> EntityManager::addPlayer() {
 }
 void EntityManager::update() {
   for (auto e : m_toAdd) {
-    std::cout << "[*] Entity added <" << e->tag() << ">" << std::endl;
+    DEBUGLOG("Entity added <" << e->tag() << ">")
     m_entities.push_back(e);
     m_entityMap[e->tag()].push_back(e);
   }

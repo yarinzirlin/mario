@@ -29,22 +29,22 @@ class Game {
   void sMovement();
   void sUserInput(sf::Event event);
   void sRender();
-  void renderEntityOutline(std::shared_ptr<Entity> e);
+  void RenderEntityOutline(std::shared_ptr<Entity> e);
   void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer);
-  void spawnPlayer();
+  void SpawnPlayer();
   void updateStandbyPortal();
   void updateMidairPortals();
   void firePortal();
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
-  void handleEntitiesCollision(std::shared_ptr<Entity> e1,
+  void HandleEntitiesCollision(std::shared_ptr<Entity> e1,
                                std::shared_ptr<Entity> e2);
-bool checkCollision(const sf::FloatRect &bb, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject);
-void handleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject);
-  void init();
+bool IsEntityCollidingWithObjGroup(const sf::FloatRect &bb, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject);
+void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject);
+  void Init();
 
 public:
   Game();
-  void run();
+  void Run();
 };
 
 #endif // !PORTAL2D_GAME_H_

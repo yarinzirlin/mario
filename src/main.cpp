@@ -9,6 +9,6 @@ void MainLoop() {}
 
 int main() {
   auto game = Game();
-  game.run();
+  game.Run();
   return 0;
 }
