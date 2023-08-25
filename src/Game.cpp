@@ -111,7 +111,6 @@ void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
 }
 
 void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
-  // Does entity collide with another?
   const auto & collision_object_group = collision_layer->getLayerAs<tmx::ObjectGroup>();
 
   for (auto e1 : m_entities->getEntities()) {
@@ -129,7 +128,6 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
       HandleEntityCollisionWithMap(e1, collider);
     }
   }
-  // Does entity collide with map?
 }
 
 bool Game::IsEntityCollidingWithObjGroup(const sf::FloatRect &bb, const tmx::ObjectGroup &collision_layer, tmx::Object & out_colliding_object) {
@@ -151,13 +149,21 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, co
   DEBUGLOG(entity->tag() << " is colliding with " << collidingObject.getPosition())
   DEBUGLOG("player ground: " << entity->bb().top + entity->bb().height)
   if (collidingObject.getPosition().y <= entity->bb().top + entity->bb().height) {
-    DEBUGLOG("Collision with ground detected")
-    entity->transform_->pos_.y = collidingObject.getAABB().top - entity->bb().height;
-    entity->transform_->velocity_.y = 0;
+    DEBUGLOG("Collision with ground detected, checking if feet are high enough")
+    if (ShouldPlaceStandingEntityOnCollider(entity, collidingObject)) {
+      entity->transform_->pos_.y = collidingObject.getAABB().top - entity->bb().height;
+      entity->transform_->velocity_.y = 0;  
+    }
+    
     entity->set_midair(false);
   } else {
     entity->set_midair(true);
   }
+}
+
+bool Game::ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity, const tmx::Object & collider) {
+  auto entity_feet_bb = entity->feet_bb();
+  return entity_feet_bb.intersects(BBTmxToSFML(collider.getAABB()));
 }
 
 void Game::HandleEntitiesCollision(std::shared_ptr<Entity> e1,

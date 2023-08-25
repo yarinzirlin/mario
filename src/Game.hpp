@@ -40,6 +40,7 @@ class Game {
                                std::shared_ptr<Entity> e2);
 bool IsEntityCollidingWithObjGroup(const sf::FloatRect &bb, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject);
 void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject);
+bool ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity, const tmx::Object & collider);
   void Init();
 
 public:

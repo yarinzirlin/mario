@@ -1,5 +1,5 @@
-#ifndef _PORTAL2D_BOUNDINGBOX_H_
-#define _PORTAL2D_BOUNDINGBOX_H_
+#ifndef PORTAL2D_BOUNDINGBOX_H_
+#define PORTAL2D_BOUNDINGBOX_H_
 
 class BoundingBox {
   float m_top, m_left, m_width, m_height;

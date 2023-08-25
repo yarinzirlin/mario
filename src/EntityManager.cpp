@@ -1,5 +1,4 @@
 #include "EntityManager.hpp"
-#include "Utils.hpp"
 #include <iostream>
 
 std::shared_ptr<Player> EntityManager::addPlayer() {

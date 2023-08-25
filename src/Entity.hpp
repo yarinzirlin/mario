@@ -41,6 +41,13 @@ public:
   int id() { return id_; }
   sf::Sprite &sprite() { return sprite_; }
   sf::FloatRect bb() { return sprite_.getGlobalBounds(); }
+  sf::FloatRect feet_bb() {
+     auto feet_bb = bb();
+    feet_bb.top += feet_bb.height;
+    feet_bb.height /= 10.f;
+    feet_bb.top -= feet_bb.height;
+    return feet_bb;
+  }
   bool affected_by_gravity() { return affected_by_gravity_; }
   bool midair() { return midair_; }
   void set_midair(bool midair) { DEBUGLOG("set " << tag() << "midair to " << midair) midair_ = midair; }
