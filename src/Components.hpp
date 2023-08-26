@@ -33,6 +33,7 @@ public:
   bool left_ = false;
   bool fire_ = false;
   bool switch_portal_ = false;
+  bool jump_ = false;
 
   CInput() {}
 };

@@ -33,6 +33,8 @@ protected:
   sf::Sprite sprite_;
   bool affected_by_gravity_ = false;
   bool midair_ = true;
+  sf::FloatRect prev_bb_;
+
 
 public:
   std::shared_ptr<CTransform> transform_;
@@ -41,10 +43,11 @@ public:
   int id() { return id_; }
   sf::Sprite &sprite() { return sprite_; }
   sf::FloatRect bb() { return sprite_.getGlobalBounds(); }
+  sf::FloatRect prev_bb() { return prev_bb_; }
   sf::FloatRect feet_bb() {
      auto feet_bb = bb();
     feet_bb.top += feet_bb.height;
-    feet_bb.height /= 10.f;
+    feet_bb.height /= 5.f;
     feet_bb.top -= feet_bb.height;
     return feet_bb;
   }
