@@ -2,15 +2,10 @@
 #define PORTAL2D_UTILS_H_
 
 #include <SFML/Graphics/Rect.hpp>
+#include <iostream>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
-
-
-static sf::FloatRect BBTmxToSFML(const tmx::FloatRect & bb) {
-    return sf::FloatRect(bb.left, bb.top, bb.width,
-                                    bb.height);
-}
-
+#include <tmxlite/Types.hpp>
 
 #if DEBUG
 #define DEBUGLOG(x) std::cout << "[*] " << x << std::endl;
@@ -18,10 +13,13 @@ static sf::FloatRect BBTmxToSFML(const tmx::FloatRect & bb) {
 #define DEBUGLOG(x)
 #endif
 
+static sf::FloatRect BBTmxToSFML(const tmx::FloatRect &bb) {
+  return sf::FloatRect(bb.left, bb.top, bb.width, bb.height);
+}
 
-
-
+static void PrintFloatRect(const sf::FloatRect &fr) {
+  DEBUGLOG("T: " << fr.top << ", L: " << fr.left << ", W: " << fr.width
+                 << ", H: " << fr.height)
+}
 
 #endif
-
-

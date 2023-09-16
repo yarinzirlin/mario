@@ -1,10 +1,10 @@
 #include "Game.hpp"
 #include "Entity.hpp"
-#include "Utils.hpp"
 #include "SFMLOrthogonalLayer.hpp"
+#include "Utils.hpp"
+#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <SFML/Window/Event.hpp>
@@ -29,7 +29,7 @@ Game::Game() {
                                                 "Portal 2D");
   paused_ = true;
   running_ = false;
-    font_.loadFromFile("assets/fonts/arial.ttf");
+  font_.loadFromFile("assets/fonts/arial.ttf");
   Init();
 }
 
@@ -84,7 +84,11 @@ void Game::sRender() {
   m_window->draw(layerZero);
   m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
-    e->sprite().setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
+    auto sprite_x_pos = e->transform_->pos_.x;
+    if (e->transform_->flipped_) {
+      sprite_x_pos += e->bb().width;
+    }
+    e->sprite().setPosition(sprite_x_pos, e->transform_->pos_.y);
     e->sprite().setRotation(e->transform_->angle_);
 
     // Set flip state
@@ -93,52 +97,52 @@ void Game::sRender() {
     } else if (!e->transform_->flipped_ && e->sprite().getScale().x < 0.f) {
       e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
     }
-    #if DEBUG
+#if DEBUG
     RenderEntityOutline(e);
     DrawInput();
-    #endif
+#endif
     m_window->draw(e->sprite());
-
-    
   }
   m_window->display();
 }
 
 void Game::DrawInput() {
-    std::ostringstream oss;
-    oss << "L: " << std::boolalpha << m_player->cInput->left_ << 
-    ", R: " << std::boolalpha << m_player->cInput->right_ <<
-    ", J: " << std::boolalpha << m_player->cInput->jump_ <<
-    ", F: " << std::boolalpha << m_player->cInput->fire_ <<
-    ", S: " << std::boolalpha << m_player->cInput->switch_portal_ <<
-    ", U: " << std::boolalpha << m_player->cInput->up_ <<
-    ", MA: " << std::boolalpha << m_player->midair();
-    DrawText(oss.str(), sf::Vector2f(0, 0), 24);
+  std::ostringstream oss;
+  oss << "L: " << std::boolalpha << m_player->cInput->left_
+      << ", R: " << std::boolalpha << m_player->cInput->right_
+      << ", J: " << std::boolalpha << m_player->cInput->jump_
+      << ", F: " << std::boolalpha << m_player->cInput->fire_
+      << ", S: " << std::boolalpha << m_player->cInput->switch_portal_
+      << ", U: " << std::boolalpha << m_player->cInput->up_
+      << ", MA: " << std::boolalpha << m_player->midair();
+  DrawText(oss.str(), sf::Vector2f(0, 0), 24);
 }
 
-void Game::DrawText(const std::string & str, const sf::Vector2f & pos, unsigned int size) {
+void Game::DrawText(const std::string &str, const sf::Vector2f &pos,
+                    unsigned int size) {
 
-    sf::Text text;
-    text.setFont(font_); 
-    text.setString(str);
-    text.setPosition(pos);
-    text.setCharacterSize(size); 
-    text.setFillColor(sf::Color::Black);
-    m_window->draw(text);
+  sf::Text text;
+  text.setFont(font_);
+  text.setString(str);
+  text.setPosition(pos);
+  text.setCharacterSize(size);
+  text.setFillColor(sf::Color::Black);
+  m_window->draw(text);
 }
 
 void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
-      sf::RectangleShape outline;
-      outline.setPosition(e->bb().left, e->bb().top);
-      outline.setSize(sf::Vector2f(e->bb().width, e->bb().height));
-      outline.setFillColor(sf::Color::Transparent);
-      outline.setOutlineColor(sf::Color::Black);
-      outline.setOutlineThickness(1.0f);
-      m_window->draw(outline);
+  sf::RectangleShape outline;
+  outline.setPosition(e->bb().left, e->bb().top);
+  outline.setSize(sf::Vector2f(e->bb().width, e->bb().height));
+  outline.setFillColor(sf::Color::Transparent);
+  outline.setOutlineColor(sf::Color::Black);
+  outline.setOutlineThickness(1.0f);
+  m_window->draw(outline);
 }
 
 void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
-  const auto & collision_object_group = collision_layer->getLayerAs<tmx::ObjectGroup>();
+  const auto &collision_object_group =
+      collision_layer->getLayerAs<tmx::ObjectGroup>();
 
   for (auto e1 : m_entities->getEntities()) {
     for (auto e2 : m_entities->getEntities()) {
@@ -157,25 +161,28 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
   }
 }
 
-bool Game::IsEntityCollidingWithObjGroup(std::shared_ptr<Entity> entity, const tmx::ObjectGroup &collision_layer, tmx::Object & out_colliding_object) {
-  for (const auto &obj :
-       collision_layer.getObjects()) {
+bool Game::IsEntityCollidingWithObjGroup(
+    std::shared_ptr<Entity> entity, const tmx::ObjectGroup &collision_layer,
+    tmx::Object &out_colliding_object) {
+  for (const auto &obj : collision_layer.getObjects()) {
     auto object_bounding_box = BBTmxToSFML(obj.getAABB());
     if (object_bounding_box.intersects(entity->bb())) {
       out_colliding_object = obj;
       return true;
-    } 
+    }
   }
 
   return false; // No collision
 }
 
-void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject) {
-  DEBUGLOG(entity->tag() << " is colliding with " << collidingObject.getPosition())
+void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
+                                        const tmx::Object &collidingObject) {
+  DEBUGLOG(entity->tag() << " is colliding with "
+                         << collidingObject.getPosition())
   DEBUGLOG("Collision with ground detected, checking if feet are high enough")
-  DEBUGLOG("Prev: " << entity->prev_bb().top + entity->prev_bb().height << " Current: " << entity->bb().top + entity->bb().height)
   if (ShouldPlaceStandingEntityOnCollider(entity, collidingObject)) {
-    entity->transform_->pos_.y = collidingObject.getAABB().top - entity->bb().height;
+    entity->transform_->pos_.y =
+        collidingObject.getAABB().top - entity->bb().height;
     entity->transform_->velocity_.y = 0;
     DEBUGLOG("Placing entity on collider ******")
     entity->set_midair(false);
@@ -184,22 +191,22 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, co
   }
 }
 
-bool Game::ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity, const tmx::Object & collider) {
+bool Game::ShouldPlaceStandingEntityOnCollider(
+    const std::shared_ptr<Entity> entity, const tmx::Object &collider) {
   auto prev_bottom = entity->prev_bb().top + entity->prev_bb().height;
   auto new_bottom = entity->bb().top + entity->bb().height;
-  return prev_bottom <= collider.getAABB().top && new_bottom > collider.getAABB().top;
+  return prev_bottom <= collider.getAABB().top &&
+         new_bottom > collider.getAABB().top;
 }
 
 void Game::HandleEntitiesCollision(std::shared_ptr<Entity> e1,
-                               std::shared_ptr<Entity> e2) {
-    if (e1->tag() != "standby_portal" && e2->tag() != "standby_portal") {
-       DEBUGLOG(e1->tag() << " is colliding with " << e2->tag())
-    }
+                                   std::shared_ptr<Entity> e2) {
+  if (e1->tag() != "standby_portal" && e2->tag() != "standby_portal") {
+    DEBUGLOG(e1->tag() << " is colliding with " << e2->tag())
+  }
 }
 
 void Game::sUserInput(sf::Event event) {
-
-
 
   switch (event.key.code) {
   case sf::Keyboard::Left:
@@ -258,10 +265,15 @@ void Game::sMovement() {
 void Game::UpdateStandbyPortal() {
   int x_offset = m_player->bb().width + sbportal_->bb().width / 2.25f;
   if (m_player->transform_->flipped_) {
+    x_offset -= m_player->bb().width;
     x_offset *= -1;
   }
   sbportal_->transform_->flipped_ = m_player->transform_->flipped_;
-  sbportal_->transform_->pos_ = m_player->transform_->pos_ + Vec2(x_offset, m_player->bb().height / 2.f);
+  Vec2 sbportal_pos;
+  sbportal_pos.x = m_player->bb().left + x_offset;
+  sbportal_pos.y = m_player->bb().top + m_player->bb().height / 2.f;
+  sbportal_->transform_->pos_ = sbportal_pos;
+
   if (m_player->cInput->switch_portal_ &&
       current_frame_ > last_portal_switch_ + FRAMERATE_LIMIT / 10) {
     last_portal_switch_ = current_frame_;
