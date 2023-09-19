@@ -17,11 +17,11 @@
 #include <tmxlite/ObjectGroup.hpp>
 #include <tmxlite/TileLayer.hpp>
 
-#define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 10
-#define PLAYER_JUMP_VELOCITY 50
+#define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 5.5
+#define PLAYER_JUMP_VELOCITY 15
 #define FRAMERATE_LIMIT 240
 #define PORTAL_VELOCITY 15
-#define GRAVITY_ACCELERATION 5
+#define GRAVITY_ACCELERATION 0.5f
 
 Game::Game() {
   m_entities = std::make_shared<EntityManager>();
@@ -84,18 +84,18 @@ void Game::sRender() {
   m_window->draw(layerZero);
   m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
-    auto sprite_x_pos = e->transform_->pos_.x;
-    if (e->transform_->flipped_) {
-      sprite_x_pos += e->bb().width;
-    }
-    e->sprite().setPosition(sprite_x_pos, e->transform_->pos_.y);
+    e->sprite().setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
     e->sprite().setRotation(e->transform_->angle_);
-
     // Set flip state
-    if (e->transform_->flipped_ && e->sprite().getScale().x >= 0.f) {
-      e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
-    } else if (!e->transform_->flipped_ && e->sprite().getScale().x < 0.f) {
-      e->sprite().setScale(-e->sprite().getScale().x, e->sprite().getScale().y);
+    auto curTextRect = e->sprite().getTextureRect();
+    if (e->transform_->flipped_ && curTextRect.width >= 0) {
+      e->sprite().setTextureRect(
+          sf::IntRect(curTextRect.left + curTextRect.width, curTextRect.top,
+                      -curTextRect.width, curTextRect.height));
+    } else if (!e->transform_->flipped_ && curTextRect.width < 0) {
+      e->sprite().setTextureRect(
+          sf::IntRect(curTextRect.left + curTextRect.width, curTextRect.top,
+                      -curTextRect.width, curTextRect.height));
     }
 #if DEBUG
     RenderEntityOutline(e);

@@ -21,5 +21,8 @@ static void PrintFloatRect(const sf::FloatRect &fr) {
   DEBUGLOG("T: " << fr.top << ", L: " << fr.left << ", W: " << fr.width
                  << ", H: " << fr.height)
 }
-
+static void PrintIntRect(const sf::IntRect &ir) {
+  DEBUGLOG("T: " << ir.top << ", L: " << ir.left << ", W: " << ir.width
+                 << ", H: " << ir.height)
+}
 #endif

@@ -19,10 +19,7 @@ class Entity {
   friend class EntityManager;
   const size_t id_ = 0;
   const std::string tag_ = "Default";
-  float width() { return sprite_.getLocalBounds().width; }
-  float height() { return sprite_.getLocalBounds().height; }
-  float top() { return sprite_.getLocalBounds().top; }
-  float left() { return sprite_.getLocalBounds().left; }
+
   bool alive_ = true;
 
 protected:
@@ -62,6 +59,10 @@ public:
   void set_midair(bool midair) {
     DEBUGLOG("set " << tag() << "midair to " << midair) midair_ = midair;
   }
+  float width() { return sprite_.getLocalBounds().width; }
+  float height() { return sprite_.getLocalBounds().height; }
+  float top() { return sprite_.getLocalBounds().top; }
+  float left() { return sprite_.getLocalBounds().left; }
   void set_prev_bb(const sf::FloatRect &prev_bb) { prev_bb_ = prev_bb; }
   virtual ~Entity(){};
 };
@@ -71,7 +72,7 @@ class Player : public Entity {
   Player(size_t id) : Entity("player", id) {
     texture_.loadFromFile("assets/player/chell.png");
     sprite_.setTexture(texture_);
-    sprite_.setScale(0.25f, 0.25f);
+    sprite_.setScale(0.15f, 0.15f);
     // sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
     //                    sprite_.getLocalBounds().height / 2.0f);
     cInput = std::make_shared<CInput>();
@@ -102,6 +103,7 @@ class StandbyPortal : public Entity {
                                        resource_size_.x, resource_size_.y));
     sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
                       sprite_.getLocalBounds().height / 2.0f);
+    sprite_.setScale(0.75, 0.75f);
   }
 
 public:
