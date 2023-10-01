@@ -17,11 +17,11 @@
 #include <tmxlite/ObjectGroup.hpp>
 #include <tmxlite/TileLayer.hpp>
 
-#define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 5.5
-#define PLAYER_JUMP_VELOCITY 15
+#define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 2
+#define PLAYER_JUMP_VELOCITY 5
 #define FRAMERATE_LIMIT 240
 #define PORTAL_VELOCITY 15
-#define GRAVITY_ACCELERATION 0.5f
+#define GRAVITY_ACCELERATION 0.1f
 
 Game::Game() {
   m_entities = std::make_shared<EntityManager>();
@@ -332,7 +332,6 @@ void Game::SpawnPlayer() {
   m_player = m_entities->addPlayer();
   m_player->transform_->pos_ = Vec2(5, 5);
   sbportal_ = m_entities->addEntity<StandbyPortal>();
-  sbportal_->transform_->pos_ = Vec2(510, 500);
 }
 
 void Game::firePortal() {

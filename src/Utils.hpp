@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 #include <iostream>
+#include <sstream>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/Types.hpp>
@@ -24,5 +25,31 @@ static void PrintFloatRect(const sf::FloatRect &fr) {
 static void PrintIntRect(const sf::IntRect &ir) {
   DEBUGLOG("T: " << ir.top << ", L: " << ir.left << ", W: " << ir.width
                  << ", H: " << ir.height)
+}
+static inline tmx::Colour ColourFromString(std::string str) {
+  // removes preceding #
+  auto result = str.find_last_of('#');
+  if (result != std::string::npos) {
+    str = str.substr(result + 1);
+  }
+
+  if (str.size() == 6 || str.size() == 8) {
+    unsigned int value, r, g, b;
+    unsigned int a = 255;
+    std::stringstream input(str);
+    input >> std::hex >> value;
+
+    r = (value >> 16) & 0xff;
+    g = (value >> 8) & 0xff;
+    b = value & 0xff;
+
+    if (str.size() == 8) {
+      a = (value >> 24) & 0xff;
+    }
+
+    return {std::uint8_t(r), std::uint8_t(g), std::uint8_t(b), std::uint8_t(a)};
+  }
+  DEBUGLOG(str << ": not a valid colour string")
+  return {};
 }
 #endif

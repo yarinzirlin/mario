@@ -5,6 +5,7 @@
 #include "Components.hpp"
 #include "Utils.hpp"
 #include "Vec2.hpp"
+#include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -76,9 +77,13 @@ public:
 class Player : public Entity {
   friend class EntityManager;
   Player(size_t id) : Entity("player", id) {
-    texture_.loadFromFile("assets/player/chell.png");
+    sf::Image img;
+    img.loadFromFile("assets/player/player.png");
+    img.createMaskFromColor({0, 116, 116, 255});
+    texture_.loadFromImage(img);
     sprite_.setTexture(texture_);
-    sprite_.setScale(0.15f, 0.15f);
+    sprite_.setTextureRect(sf::IntRect(232, 112, 16, 24));
+    sprite_.setScale(2.f, 2.f);
     // sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
     //                    sprite_.getLocalBounds().height / 2.0f);
     cInput = std::make_shared<CInput>();

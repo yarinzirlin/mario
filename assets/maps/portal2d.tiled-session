@@ -15,6 +15,10 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "player.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3.34
+        },
         "test.tmx": {
             "expandedObjectLayers": [
                 2
@@ -38,7 +42,7 @@
             }
         }
     },
-    "last.imagePath": "/Users/yarinz/git/portal2d/assets/maps",
+    "last.imagePath": "/Users/yarinz/git/portal2d/assets/player",
     "map.height": 45,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
@@ -48,6 +52,7 @@
     ],
     "project": "portal2d.tiled-project",
     "recentFiles": [
+        "player.tsx",
         "test1.tmx",
         "test.tmx",
         "mario.tsx",
@@ -56,9 +61,9 @@
     "tileset.lastUsedFormat": "tsx",
     "tileset.spacing": 0,
     "tileset.tileSize": {
-        "height": 17,
-        "width": 17
+        "height": 16,
+        "width": 16
     },
-    "tileset.transparentColor": "#004080",
+    "tileset.transparentColor": "#007474",
     "tileset.useTransparentColor": true
 }
