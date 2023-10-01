@@ -1,9 +1,14 @@
 #include "EntityManager.hpp"
 #include "Utils.hpp"
+#include <__algorithm/remove_if.h>
 #include <iostream>
+#include <iterator>
+#include <memory>
+
+bool IsEntityAlive(std::shared_ptr<Entity> e) { return !e->alive(); }
 
 std::shared_ptr<Player> EntityManager::addPlayer() {
-  if (m_playerCreated) {
+  if (player_created_) {
     return nullptr;
   }
   auto player = addEntity<Player>();
@@ -11,18 +16,30 @@ std::shared_ptr<Player> EntityManager::addPlayer() {
   return player;
 }
 void EntityManager::update() {
-  for (auto e : m_toAdd) {
+  for (auto e : to_add_) {
     DEBUGLOG("Entity added <" << e->tag() << ">")
-    m_entities.push_back(e);
-    m_entityMap[e->tag()].push_back(e);
+    entities_.push_back(e);
+    entity_map_[e->tag()].push_back(e);
   }
-  for (auto e : m_entities) {
+
+  auto old_count = entities_.size();
+  auto new_end =
+      std::remove_if(entities_.begin(), entities_.end(), IsEntityAlive);
+
+  entities_.erase(new_end, entities_.end());
+#if DEBUG
+  if (old_count != entities_.size()) {
+    DEBUGLOG("Destroyed " << old_count - entities_.size() << " entities")
   }
-  m_toAdd.clear();
+#endif
+
+  for (auto e : entities_) {
+  }
+  to_add_.clear();
 }
 
-EntityVec &EntityManager::getEntities() { return m_entities; }
+EntityVec &EntityManager::getEntities() { return entities_; }
 
 EntityVec &EntityManager::getEntities(const std::string &tag) {
-  return m_entityMap[tag];
+  return entity_map_[tag];
 }

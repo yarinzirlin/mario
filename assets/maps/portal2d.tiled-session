@@ -1,0 +1,64 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "mario.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "mario2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "test.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.522,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 133.70565045992115,
+                "y": 562.4178712220762
+            }
+        },
+        "test1.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.0755,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 276.6155276615528,
+                "y": 575.5462575546258
+            }
+        }
+    },
+    "last.imagePath": "/Users/yarinz/git/portal2d/assets/maps",
+    "map.height": 45,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 80,
+    "openFiles": [
+    ],
+    "project": "portal2d.tiled-project",
+    "recentFiles": [
+        "test1.tmx",
+        "test.tmx",
+        "mario.tsx",
+        "mario2.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.spacing": 0,
+    "tileset.tileSize": {
+        "height": 17,
+        "width": 17
+    },
+    "tileset.transparentColor": "#004080",
+    "tileset.useTransparentColor": true
+}

@@ -3,10 +3,10 @@
 
 #include "Entity.hpp"
 #include "EntityManager.hpp"
+#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Object.hpp>
@@ -31,10 +31,12 @@ class Game {
   void sMovement();
   void sUserInput(sf::Event event);
   void sRender();
-  void DrawText(const std::string & str, const sf::Vector2f & pos, unsigned int size);
+  void DrawText(const std::string &str, const sf::Vector2f &pos,
+                unsigned int size);
   void DrawInput();
   void RenderEntityOutline(std::shared_ptr<Entity> e);
-  void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer);
+  void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer,
+                  const tmx::Map &map);
   void SpawnPlayer();
   void UpdateStandbyPortal();
   void UpdateMidairPortals();
@@ -42,9 +44,16 @@ class Game {
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
   void HandleEntitiesCollision(std::shared_ptr<Entity> e1,
                                std::shared_ptr<Entity> e2);
-bool IsEntityCollidingWithObjGroup(std::shared_ptr<Entity> entity, const tmx::ObjectGroup &collisionLayer, tmx::Object & outCollidingObject);
-void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity, const tmx::Object & collidingObject);
-bool ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity, const tmx::Object & collider);
+  bool IsEntityCollidingWithObjGroup(std::shared_ptr<Entity> entity,
+                                     const tmx::ObjectGroup &collisionLayer,
+                                     tmx::Object &outCollidingObject);
+  bool IsEntityOutOfBounds(const std::shared_ptr<Entity> entity,
+                           const tmx::Map &map);
+  void HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity);
+  void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
+                                    const tmx::Object &collidingObject);
+  bool ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity,
+                                           const tmx::Object &collider);
   void Init();
 
 public:

@@ -29,12 +29,16 @@ protected:
   sf::Texture texture_;
   sf::Sprite sprite_;
   bool affected_by_gravity_ = false;
+  bool should_destroy_if_obb_ = false;
   bool midair_ = true;
   sf::FloatRect prev_bb_;
 
 public:
   std::shared_ptr<CTransform> transform_;
-  void destroy() { alive_ = false; }
+  void destroy() {
+    alive_ = false;
+    DEBUGLOG("Destroyed <" << tag() << ">")
+  }
   const std::string &tag() { return tag_; }
   int id() { return id_; }
   sf::Sprite &sprite() { return sprite_; }
@@ -55,6 +59,7 @@ public:
     return feet_bb;
   }
   bool affected_by_gravity() { return affected_by_gravity_; }
+  bool should_destroy_if_obb() { return should_destroy_if_obb_; }
   bool midair() { return midair_; }
   void set_midair(bool midair) {
     DEBUGLOG("set " << tag() << "midair to " << midair) midair_ = midair;
@@ -64,6 +69,7 @@ public:
   float top() { return sprite_.getLocalBounds().top; }
   float left() { return sprite_.getLocalBounds().left; }
   void set_prev_bb(const sf::FloatRect &prev_bb) { prev_bb_ = prev_bb; }
+  bool alive() { return alive_; }
   virtual ~Entity(){};
 };
 
@@ -136,8 +142,9 @@ class MidairPortal : public Entity {
                                     ".png");
     sprite_.setTexture(texture_);
     sprite_.setScale(2.f, 2.f);
+    should_destroy_if_obb_ = true;
   }
-  void SetTexture() {
+  void UpdateTexture() {
     sprite_.setTextureRect(
         sf::IntRect(base_resource_pos_.x + phases_pos_offsets_[cur_phase_].x,
                     base_resource_pos_.y + phases_pos_offsets_[cur_phase_].y,
@@ -154,7 +161,7 @@ public:
       return;
     }
     cur_phase_++;
-    SetTexture();
+    UpdateTexture();
     last_phase_change_ = current_frame;
   }
   void AlternateColor() {
@@ -168,4 +175,21 @@ public:
   PortalColor portal_color() { return portal_color_; }
 };
 
+class ActivePortal : public Entity {
+  friend class EntityManager;
+  PortalColor color_;
+
+protected:
+  ActivePortal(const std::string &tag, size_t id, PortalColor color)
+      : Entity(tag, id) {
+    color_ = color;
+    texture_.loadFromFile(PortalsBasePath + static_cast<char>(color_) + ".png");
+  }
+};
+class ActivePurplePortal : public ActivePortal {
+  friend class EntityManager;
+};
+class ActiveGreenPortal : public ActivePortal {
+  friend class EntityManager;
+};
 #endif

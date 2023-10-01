@@ -25,8 +25,8 @@
 
 Game::Game() {
   m_entities = std::make_shared<EntityManager>();
-  m_window = std::make_shared<sf::RenderWindow>(sf::VideoMode(1920, 1080),
-                                                "Portal 2D");
+  m_window =
+      std::make_shared<sf::RenderWindow>(sf::VideoMode(1280, 720), "Portal 2D");
   paused_ = true;
   running_ = false;
   font_.loadFromFile("assets/fonts/arial.ttf");
@@ -38,7 +38,7 @@ void Game::Init() {
   paused_ = false;
   running_ = true;
   current_frame_ = 0;
-  m_window->create(sf::VideoMode(1920, 1080), "Portal 2D");
+  m_window->create(sf::VideoMode(1280, 720), "Portal 2D");
   m_window->setFramerateLimit(FRAMERATE_LIMIT);
   current_frame_ = 0;
 
@@ -55,8 +55,23 @@ void Game::Init() {
 tmx::Map map;
 #define COLLISION_LAYER "Collision"
 void Game::Run() {
-  map.load("assets/maps/map0.tmx");
-
+  map.load("assets/maps/test.tmx");
+  DEBUGLOG(map.getTileSize())
+  auto ts = map.getTilesets();
+  for (auto t : ts) {
+    auto margin = t.getMargin();
+    DEBUGLOG("margin" << margin)
+    auto spacing = t.getSpacing();
+    DEBUGLOG("spacing" << spacing)
+    auto props = t.getProperties();
+    for (auto p : props) {
+      DEBUGLOG("prop " << p.getName())
+    }
+    auto tilesize = t.getTileSize();
+    DEBUGLOG("tilesize" << tilesize)
+    auto tileone = t.getTile(1);
+    DEBUGLOG("tileone" << tileone)
+  }
   while (m_window->isOpen()) {
     m_entities->update();
     sf::Event event;
@@ -70,7 +85,7 @@ void Game::Run() {
     const auto &layers = map.getLayers();
     for (const auto &layer : layers) {
       if (layer->getName() == COLLISION_LAYER)
-        sCollision(layer);
+        sCollision(layer, map);
     }
     sRender();
     current_frame_++;
@@ -80,9 +95,9 @@ void Game::Run() {
 void Game::sRender() {
   m_window->clear();
   MapLayer layerZero(map, 0);
-  MapLayer layerOne(map, 1);
+  // MapLayer layerOne(map, 1);
   m_window->draw(layerZero);
-  m_window->draw(layerOne);
+  // m_window->draw(layerOne);
   for (auto e : m_entities->getEntities()) {
     e->sprite().setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
     e->sprite().setRotation(e->transform_->angle_);
@@ -140,7 +155,8 @@ void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
   m_window->draw(outline);
 }
 
-void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
+void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
+                      const tmx::Map &map) {
   const auto &collision_object_group =
       collision_layer->getLayerAs<tmx::ObjectGroup>();
 
@@ -158,6 +174,10 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer) {
     if (IsEntityCollidingWithObjGroup(e1, collision_object_group, collider)) {
       HandleEntityCollisionWithMap(e1, collider);
     }
+
+    if (IsEntityOutOfBounds(e1, map)) {
+      HandleEntityOutOfBounds(e1);
+    }
   }
 }
 
@@ -173,6 +193,23 @@ bool Game::IsEntityCollidingWithObjGroup(
   }
 
   return false; // No collision
+}
+
+bool Game::IsEntityOutOfBounds(const std::shared_ptr<Entity> entity,
+                               const tmx::Map &map) {
+  auto bounds = map.getBounds();
+  auto entity_bb = entity->bb();
+
+  return entity_bb.left > bounds.width ||
+         entity_bb.left + entity_bb.width < bounds.left ||
+         entity_bb.top > bounds.height ||
+         entity_bb.top + entity_bb.height < bounds.top;
+}
+
+void Game::HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity) {
+  if (entity->should_destroy_if_obb()) {
+    entity->destroy();
+  }
 }
 
 void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
@@ -293,7 +330,7 @@ void Game::UpdateMidairPortals() {
 
 void Game::SpawnPlayer() {
   m_player = m_entities->addPlayer();
-  m_player->transform_->pos_ = Vec2(500, 500);
+  m_player->transform_->pos_ = Vec2(5, 5);
   sbportal_ = m_entities->addEntity<StandbyPortal>();
   sbportal_->transform_->pos_ = Vec2(510, 500);
 }
