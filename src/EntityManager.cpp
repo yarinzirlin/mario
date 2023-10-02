@@ -34,6 +34,7 @@ void EntityManager::update() {
 #endif
 
   for (auto e : entities_) {
+    e->set_prev_bb(e->bb());
   }
   to_add_.clear();
 }

@@ -170,8 +170,9 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
         HandleEntitiesCollision(e1, e2);
       }
     }
-    tmx::Object collider;
-    if (IsEntityCollidingWithObjGroup(e1, collision_object_group, collider)) {
+
+    auto colliders = GetObjGroupColliders(e1, collision_object_group);
+    for (auto collider : colliders) {
       HandleEntityCollisionWithMap(e1, collider);
     }
 
@@ -181,18 +182,17 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
   }
 }
 
-bool Game::IsEntityCollidingWithObjGroup(
-    std::shared_ptr<Entity> entity, const tmx::ObjectGroup &collision_layer,
-    tmx::Object &out_colliding_object) {
+std::vector<tmx::Object>
+Game::GetObjGroupColliders(std::shared_ptr<Entity> entity,
+                           const tmx::ObjectGroup &collision_layer) {
+  std::vector<tmx::Object> colliders;
   for (const auto &obj : collision_layer.getObjects()) {
     auto object_bounding_box = BBTmxToSFML(obj.getAABB());
     if (object_bounding_box.intersects(entity->bb())) {
-      out_colliding_object = obj;
-      return true;
+      colliders.push_back(obj);
     }
   }
-
-  return false; // No collision
+  return colliders;
 }
 
 bool Game::IsEntityOutOfBounds(const std::shared_ptr<Entity> entity,
@@ -216,16 +216,72 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                         const tmx::Object &collidingObject) {
   DEBUGLOG(entity->tag() << " is colliding with "
                          << collidingObject.getPosition())
-  DEBUGLOG("Collision with ground detected, checking if feet are high enough")
-  if (ShouldPlaceStandingEntityOnCollider(entity, collidingObject)) {
+  if (IsBottomCollider(entity, collidingObject)) {
+
+    DEBUGLOG("Collision with ground detected, checking if feet are high enough")
     entity->transform_->pos_.y =
-        collidingObject.getAABB().top - entity->bb().height;
+        collidingObject.getAABB().top - entity->bb().height + 1;
     entity->transform_->velocity_.y = 0;
     DEBUGLOG("Placing entity on collider ******")
     entity->set_midair(false);
   } else {
     entity->set_midair(true);
   }
+  if (IsRightCollider(entity, collidingObject)) {
+    DEBUGLOG("Right collider")
+    entity->transform_->pos_.x =
+        collidingObject.getAABB().left - entity->bb().width - 1;
+    entity->transform_->velocity_.x = 0;
+  }
+  if (IsLeftCollider(entity, collidingObject)) {
+    DEBUGLOG("Left collider")
+    entity->transform_->pos_.x =
+        collidingObject.getAABB().left + collidingObject.getAABB().width + 1;
+    entity->transform_->velocity_.x = 0;
+  }
+  if (IsTopCollider(entity, collidingObject)) {
+    DEBUGLOG("Top collider")
+    entity->transform_->pos_.y =
+        collidingObject.getAABB().top + collidingObject.getAABB().height - 1;
+    entity->transform_->velocity_.y = 0;
+  }
+}
+
+bool Game::IsBottomCollider(const std::shared_ptr<Entity> entity,
+                            const tmx::Object &collidingObject) {
+
+  auto prev_bottom = entity->prev_bb().top + entity->prev_bb().height;
+  auto new_bottom = entity->bb().top + entity->bb().height;
+  return prev_bottom <= collidingObject.getAABB().top &&
+         new_bottom > collidingObject.getAABB().top;
+}
+bool Game::IsTopCollider(const std::shared_ptr<Entity> entity,
+                         const tmx::Object &collidingObject) {
+
+  auto prev_top = entity->prev_bb().top;
+  auto new_top = entity->bb().top;
+  return prev_top <=
+             collidingObject.getAABB().top + collidingObject.getAABB().height &&
+         new_top >
+             collidingObject.getAABB().top + collidingObject.getAABB().height;
+}
+bool Game::IsLeftCollider(const std::shared_ptr<Entity> entity,
+                          const tmx::Object &collidingObject) {
+
+  auto prev_left = entity->prev_bb().left;
+  auto new_left = entity->bb().left;
+  return prev_left <=
+             collidingObject.getAABB().left + collidingObject.getAABB().width &&
+         new_left >
+             collidingObject.getAABB().left + collidingObject.getAABB().width;
+}
+bool Game::IsRightCollider(const std::shared_ptr<Entity> entity,
+                           const tmx::Object &collidingObject) {
+
+  auto prev_right = entity->prev_bb().left + entity->prev_bb().width;
+  auto new_right = entity->bb().left + entity->bb().width;
+  return prev_right <= collidingObject.getAABB().left &&
+         new_right > collidingObject.getAABB().left;
 }
 
 bool Game::ShouldPlaceStandingEntityOnCollider(

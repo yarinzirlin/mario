@@ -44,14 +44,22 @@ class Game {
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
   void HandleEntitiesCollision(std::shared_ptr<Entity> e1,
                                std::shared_ptr<Entity> e2);
-  bool IsEntityCollidingWithObjGroup(std::shared_ptr<Entity> entity,
-                                     const tmx::ObjectGroup &collisionLayer,
-                                     tmx::Object &outCollidingObject);
+  std::vector<tmx::Object>
+  GetObjGroupColliders(std::shared_ptr<Entity> entity,
+                       const tmx::ObjectGroup &collisionLayer);
   bool IsEntityOutOfBounds(const std::shared_ptr<Entity> entity,
                            const tmx::Map &map);
   void HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity);
   void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                     const tmx::Object &collidingObject);
+  bool IsBottomCollider(const std::shared_ptr<Entity> entity,
+                        const tmx::Object &collidingObject);
+  bool IsTopCollider(const std::shared_ptr<Entity> entity,
+                     const tmx::Object &collidingObject);
+  bool IsLeftCollider(const std::shared_ptr<Entity> entity,
+                      const tmx::Object &collidingObject);
+  bool IsRightCollider(const std::shared_ptr<Entity> entity,
+                       const tmx::Object &collidingObject);
   bool ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity,
                                            const tmx::Object &collider);
   void Init();
