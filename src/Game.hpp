@@ -13,13 +13,20 @@
 
 #define PORTAL_COOLDOWN_TICKS 60
 
+enum Direction { Undetermined, Top, Bottom, Left, Right };
+
+struct Collider {
+  const tmx::Object &collidingObject;
+  Direction direction;
+};
+
 class Game {
-  std::shared_ptr<sf::RenderWindow> m_window;
-  std::shared_ptr<EntityManager> m_entities;
-  std::shared_ptr<Player> m_player;
+  std::shared_ptr<sf::RenderWindow> window_;
+  std::shared_ptr<EntityManager> entities_;
+  std::shared_ptr<Player> player_;
   std::shared_ptr<StandbyPortal> sbportal_;
-  sf::Texture m_backgroundTexture;
-  sf::Sprite m_backgroundSprite;
+  sf::Texture background_texture_;
+  sf::Sprite background_sprite_;
   bool paused_ = false;
   bool running_ = false;
   unsigned int last_portal_switch_ = 0;
@@ -50,8 +57,10 @@ class Game {
   bool IsEntityOutOfBounds(const std::shared_ptr<Entity> entity,
                            const tmx::Map &map);
   void HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity);
+  Collider IdentifyCollider(const std::shared_ptr<Entity> entity,
+                            const tmx::Object &collidingObject);
   void HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
-                                    const tmx::Object &collidingObject);
+                                    const Collider &collider);
   bool IsBottomCollider(const std::shared_ptr<Entity> entity,
                         const tmx::Object &collidingObject);
   bool IsTopCollider(const std::shared_ptr<Entity> entity,

@@ -63,7 +63,11 @@ public:
   bool should_destroy_if_obb() { return should_destroy_if_obb_; }
   bool midair() { return midair_; }
   void set_midair(bool midair) {
-    DEBUGLOG("set " << tag() << "midair to " << midair) midair_ = midair;
+    if (midair_ == midair) {
+      return;
+    }
+    DEBUGLOG("set " << tag() << "midair to " << midair)
+    midair_ = midair;
   }
   float width() { return sprite_.getLocalBounds().width; }
   float height() { return sprite_.getLocalBounds().height; }

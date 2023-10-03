@@ -2,6 +2,7 @@
 #define PORTAL2D_UTILS_H_
 
 #include <SFML/Graphics/Rect.hpp>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <tmxlite/Layer.hpp>
@@ -9,10 +10,34 @@
 #include <tmxlite/Types.hpp>
 
 #if DEBUG
-#define DEBUGLOG(x) std::cout << "[*] " << x << std::endl;
+#define DEBUGLOG(x)                                                            \
+  std::cout << std::setprecision(6) << std::setw(10) << "[*] " << x            \
+            << std::endl;
 #else
 #define DEBUGLOG(x)
 #endif
+
+#define COMP_EPSILON 0.01
+
+static bool FloatEquals(float a, float b) {
+  return fabs(a - b) <= COMP_EPSILON;
+}
+
+static bool Intersects(sf::FloatRect f, sf::FloatRect s) {
+  auto f_is_to_the_right_of_s =
+      f.left > s.left + s.width && !FloatEquals(f.left, s.left + s.width);
+  auto f_is_to_the_left_of_s =
+      f.left + f.width < s.left && !FloatEquals(f.left + f.width, s.left);
+  auto f_is_above_s =
+      f.top + f.height < s.top && !FloatEquals(f.top + f.height, s.top);
+  auto f_is_below_s =
+      f.top > s.top + s.height && !FloatEquals(f.top, s.top + s.height);
+  DEBUGLOG("right of " << f_is_to_the_right_of_s << ", left of "
+                       << f_is_to_the_left_of_s << ", below of " << f_is_below_s
+                       << ", above of " << f_is_above_s)
+  return !(f_is_to_the_right_of_s || f_is_to_the_left_of_s || f_is_above_s ||
+           f_is_below_s);
+}
 
 static sf::FloatRect BBTmxToSFML(const tmx::FloatRect &bb) {
   return sf::FloatRect(bb.left, bb.top, bb.width, bb.height);
