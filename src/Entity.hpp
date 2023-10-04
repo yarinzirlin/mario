@@ -5,6 +5,8 @@
 #include "Components.hpp"
 #include "Utils.hpp"
 #include "Vec2.hpp"
+
+#include "Animation.hpp"
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -23,17 +25,20 @@ class Entity {
   const std::string tag_ = "Default";
 
   bool alive_ = true;
+  std::shared_ptr<Animation> animation_;
 
 protected:
   Entity(const std::string &tag, size_t id) : id_(id), tag_(tag) {
     transform_ = std::make_shared<CTransform>();
   }
-  sf::Texture texture_;
-  sf::Sprite sprite_;
   bool affected_by_gravity_ = false;
   bool should_destroy_if_obb_ = false;
   bool midair_ = true;
   sf::FloatRect prev_bb_;
+  std::shared_ptr<Animation> default_animation_;
+  std::shared_ptr<Animation> moving_animation_;
+  std::shared_ptr<Animation> midair_animation_;
+  sf::Texture texture_;
 
 public:
   std::shared_ptr<CTransform> transform_;
@@ -43,13 +48,18 @@ public:
   }
   const std::string &tag() { return tag_; }
   int id() { return id_; }
-  sf::Sprite &sprite() { return sprite_; }
+  const std::shared_ptr<sf::Sprite> sprite() {
+    if (animation_) {
+      return animation_->sprite();
+    }
+    return default_animation_->sprite();
+  }
   sf::FloatRect bb() {
     sf::FloatRect bb;
-    bb.top = transform_->pos_.y - sprite_.getOrigin().y;
-    bb.left = transform_->pos_.x - sprite_.getOrigin().x;
-    bb.width = sprite_.getGlobalBounds().width;
-    bb.height = sprite_.getGlobalBounds().height;
+    bb.top = transform_->pos_.y - sprite()->getOrigin().y;
+    bb.left = transform_->pos_.x - sprite()->getOrigin().x;
+    bb.width = sprite()->getGlobalBounds().width;
+    bb.height = sprite()->getGlobalBounds().height;
     return bb;
   }
   sf::FloatRect prev_bb() { return prev_bb_; }
@@ -70,12 +80,18 @@ public:
     DEBUGLOG("set " << tag() << "midair to " << midair)
     midair_ = midair;
   }
-  float width() { return sprite_.getLocalBounds().width; }
-  float height() { return sprite_.getLocalBounds().height; }
-  float top() { return sprite_.getLocalBounds().top; }
-  float left() { return sprite_.getLocalBounds().left; }
   void set_prev_bb(const sf::FloatRect &prev_bb) { prev_bb_ = prev_bb; }
   bool alive() { return alive_; }
+  void UpdateAnimation(unsigned int current_frame) {
+    animation_ = default_animation_;
+    if (midair() && midair_animation_) {
+      animation_ = midair_animation_;
+    } else if (transform_->velocity_.x != 0 && moving_animation_) {
+      DEBUGLOG("here")
+      animation_ = moving_animation_;
+    }
+    animation_->Update(current_frame);
+  }
   virtual ~Entity(){};
 };
 
@@ -85,12 +101,21 @@ class Player : public Entity {
     sf::Image img;
     img.loadFromFile("assets/player/player.png");
     img.createMaskFromColor({0, 116, 116, 255});
+    auto sprite = std::make_shared<sf::Sprite>();
     texture_.loadFromImage(img);
-    sprite_.setTexture(texture_);
-    sprite_.setTextureRect(sf::IntRect(232, 112, 16, 24));
-    sprite_.setScale(2.f, 2.f);
-    // sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
-    //                    sprite_.getLocalBounds().height / 2.0f);
+    sprite->setTexture(texture_);
+    sprite->setScale(2.f, 2.f);
+
+    std::vector<sf::IntRect> idling_rects = {{964, 48, 16, 24}};
+    default_animation_ = std::make_shared<Animation>(sprite, idling_rects, 0);
+
+    std::vector<sf::IntRect> walking_rects = {{808, 48, 16, 24},
+                                              {808 - 52, 48, 16, 24},
+                                              {808 - (52 * 2), 48, 16, 24}};
+    moving_animation_ = std::make_shared<Animation>(sprite, walking_rects, 15);
+
+    std::vector<sf::IntRect> jumping_rects = {{912, 112, 16, 24}};
+    midair_animation_ = std::make_shared<Animation>(sprite, jumping_rects);
     cInput = std::make_shared<CInput>();
     affected_by_gravity_ = true;
   }
@@ -113,13 +138,14 @@ class StandbyPortal : public Entity {
     texture_.loadFromFile(PortalsBasePath + static_cast<char>(Purple) + ".png");
     alternate_texture_.loadFromFile(PortalsBasePath + static_cast<char>(Green) +
                                     ".png");
-
-    sprite_.setTexture(texture_);
-    sprite_.setTextureRect(sf::IntRect(resource_pos_.x, resource_pos_.y,
+    std::shared_ptr<sf::Sprite> sprite = std::make_shared<sf::Sprite>();
+    sprite->setTexture(texture_);
+    sprite->setOrigin(resource_size_.x / 2.0f, resource_size_.y / 2.0f);
+    sprite->setScale(0.75, 0.75f);
+    sprite->setTextureRect(sf::IntRect(resource_pos_.x, resource_pos_.y,
                                        resource_size_.x, resource_size_.y));
-    sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
-                      sprite_.getLocalBounds().height / 2.0f);
-    sprite_.setScale(0.75, 0.75f);
+    std::vector<sf::IntRect> default_rects = {{213, 89, 19, 19}};
+    default_animation_ = std::make_shared<Animation>(sprite, default_rects, 0);
   }
 
 public:
@@ -150,30 +176,19 @@ class MidairPortal : public Entity {
     texture_.loadFromFile(PortalsBasePath + static_cast<char>(Purple) + ".png");
     altername_texture_.loadFromFile(PortalsBasePath + static_cast<char>(Green) +
                                     ".png");
-    sprite_.setTexture(texture_);
-    sprite_.setScale(2.f, 2.f);
+    std::shared_ptr<sf::Sprite> sprite = std::make_shared<sf::Sprite>();
+    sprite->setTexture(texture_);
+    sprite->setScale(2.f, 2.f);
+    std::vector<sf::IntRect> animation_rects = {
+        {16, 90, 35, 12}, {16 + 62, 90, 35, 12}, {16 + (62 * 2), 90, 35, 12}};
+    default_animation_ =
+        std::make_shared<Animation>(sprite, animation_rects, 10, false);
     should_destroy_if_obb_ = true;
-  }
-  void UpdateTexture() {
-    sprite_.setTextureRect(
-        sf::IntRect(base_resource_pos_.x + phases_pos_offsets_[cur_phase_].x,
-                    base_resource_pos_.y + phases_pos_offsets_[cur_phase_].y,
-                    size_.x, size_.y));
-    sprite_.setOrigin(sprite_.getLocalBounds().width / 2.0f,
-                      sprite_.getLocalBounds().height / 2.0f);
   }
 
 public:
   unsigned int last_phase_change() { return last_phase_change_; };
 
-  void NextPhase(unsigned int current_frame) {
-    if (cur_phase_ >= (int)phases_pos_offsets_.size() - 1) {
-      return;
-    }
-    cur_phase_++;
-    UpdateTexture();
-    last_phase_change_ = current_frame;
-  }
   void AlternateColor() {
     std::swap(texture_, altername_texture_);
     if (portal_color_ == Purple) {
@@ -193,7 +208,8 @@ protected:
   ActivePortal(const std::string &tag, size_t id, PortalColor color)
       : Entity(tag, id) {
     color_ = color;
-    texture_.loadFromFile(PortalsBasePath + static_cast<char>(color_) + ".png");
+    // texture_.loadFromFile(PortalsBasePath + static_cast<char>(color_) +
+    // ".png");
   }
 };
 class ActivePurplePortal : public ActivePortal {
@@ -201,46 +217,6 @@ class ActivePurplePortal : public ActivePortal {
 };
 class ActiveGreenPortal : public ActivePortal {
   friend class EntityManager;
-};
-
-class Animation {
-  sf::Sprite sprite_;
-  std::vector<sf::IntRect> rects_;
-  bool rotation_;
-  unsigned int interval_;
-  unsigned int last_phase_change_;
-  size_t current_rect_;
-
-  Animation(sf::Sprite sprite, std::vector<sf::IntRect> rects,
-            unsigned int interval, bool rotation = false) {
-    sprite_ = sprite;
-    rects_ = rects;
-    interval_ = interval;
-    rotation_ = rotation;
-    current_rect_ = 0;
-    last_phase_change_ = -1;
-  }
-
-  void Update(unsigned int current_tick) {
-    if (last_phase_change_ != -1 &&
-        current_tick - last_phase_change_ < interval_)
-      return;
-    current_rect_ = NextRectIndex();
-    auto next_rect = rects_[current_rect_];
-    sprite_.setTextureRect(next_rect);
-    last_phase_change_ = current_tick;
-  }
-
-  size_t NextRectIndex() {
-    if (rects_.size() - 1 == current_rect_) {
-      if (rotation_) {
-        return 0;
-      } else {
-        return rects_.size() - 1;
-      }
-    }
-    return current_rect_ + 1;
-  }
 };
 
 #endif

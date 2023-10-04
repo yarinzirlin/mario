@@ -42,11 +42,11 @@ void Game::Init() {
   window_->setFramerateLimit(FRAMERATE_LIMIT);
   current_frame_ = 0;
 
-  background_texture_.loadFromFile("resources/backgrounds/4.png");
-  background_sprite_.setTexture(background_texture_);
-  background_sprite_.setScale(
-      window_->getSize().x / background_sprite_.getLocalBounds().width,
-      window_->getSize().y / background_sprite_.getLocalBounds().height);
+  // background_texture_.loadFromFile("resources/backgrounds/4.png");
+  // background_sprite_.setTexture(background_texture_);
+  // background_sprite_.setScale(
+  //     window_->getSize().x / background_sprite_.getLocalBounds().width,
+  // window_->getSize().y / background_sprite_.getLocalBounds().height);
 
   SpawnPlayer();
   DEBUGLOG("Initialization finished")
@@ -85,16 +85,17 @@ void Game::sRender() {
   window_->draw(layerZero);
   // m_window->draw(layerOne);
   for (auto e : entities_->getEntities()) {
-    e->sprite().setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
-    e->sprite().setRotation(e->transform_->angle_);
+    e->UpdateAnimation(current_frame_);
+    e->sprite()->setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
+    e->sprite()->setRotation(e->transform_->angle_);
     // Set flip state
-    auto curTextRect = e->sprite().getTextureRect();
+    auto curTextRect = e->sprite()->getTextureRect();
     if (e->transform_->flipped_ && curTextRect.width >= 0) {
-      e->sprite().setTextureRect(
+      e->sprite()->setTextureRect(
           sf::IntRect(curTextRect.left + curTextRect.width, curTextRect.top,
                       -curTextRect.width, curTextRect.height));
     } else if (!e->transform_->flipped_ && curTextRect.width < 0) {
-      e->sprite().setTextureRect(
+      e->sprite()->setTextureRect(
           sf::IntRect(curTextRect.left + curTextRect.width, curTextRect.top,
                       -curTextRect.width, curTextRect.height));
     }
@@ -102,7 +103,7 @@ void Game::sRender() {
     RenderEntityOutline(e);
     DrawInput();
 #endif
-    window_->draw(e->sprite());
+    window_->draw(*e->sprite());
   }
   window_->display();
 }
@@ -368,7 +369,6 @@ void Game::sMovement() {
     }
   }
   UpdateStandbyPortal();
-  UpdateMidairPortals();
 }
 
 void Game::UpdateStandbyPortal() {
@@ -387,16 +387,6 @@ void Game::UpdateStandbyPortal() {
       current_frame_ > last_portal_switch_ + FRAMERATE_LIMIT / 10) {
     last_portal_switch_ = current_frame_;
     sbportal_->AlternateColor();
-  }
-}
-
-void Game::UpdateMidairPortals() {
-  for (auto e : entities_->getEntities("midair_portal")) {
-    auto p = std::dynamic_pointer_cast<MidairPortal>(e);
-
-    if (p->last_phase_change() + PhaseDuration < current_frame_) {
-      p->NextPhase(current_frame_);
-    }
   }
 }
 
@@ -421,5 +411,4 @@ void Game::firePortal() {
   if (player_->transform_->flipped_) {
     portal->transform_->velocity_ *= -1;
   }
-  portal->NextPhase(current_frame_);
 }
