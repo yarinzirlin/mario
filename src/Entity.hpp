@@ -10,6 +10,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Transform.hpp>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -201,4 +202,45 @@ class ActivePurplePortal : public ActivePortal {
 class ActiveGreenPortal : public ActivePortal {
   friend class EntityManager;
 };
+
+class Animation {
+  sf::Sprite sprite_;
+  std::vector<sf::IntRect> rects_;
+  bool rotation_;
+  unsigned int interval_;
+  unsigned int last_phase_change_;
+  size_t current_rect_;
+
+  Animation(sf::Sprite sprite, std::vector<sf::IntRect> rects,
+            unsigned int interval, bool rotation = false) {
+    sprite_ = sprite;
+    rects_ = rects;
+    interval_ = interval;
+    rotation_ = rotation;
+    current_rect_ = 0;
+    last_phase_change_ = -1;
+  }
+
+  void Update(unsigned int current_tick) {
+    if (last_phase_change_ != -1 &&
+        current_tick - last_phase_change_ < interval_)
+      return;
+    current_rect_ = NextRectIndex();
+    auto next_rect = rects_[current_rect_];
+    sprite_.setTextureRect(next_rect);
+    last_phase_change_ = current_tick;
+  }
+
+  size_t NextRectIndex() {
+    if (rects_.size() - 1 == current_rect_) {
+      if (rotation_) {
+        return 0;
+      } else {
+        return rects_.size() - 1;
+      }
+    }
+    return current_rect_ + 1;
+  }
+};
+
 #endif

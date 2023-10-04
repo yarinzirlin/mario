@@ -32,9 +32,6 @@ static bool Intersects(sf::FloatRect f, sf::FloatRect s) {
       f.top + f.height < s.top && !FloatEquals(f.top + f.height, s.top);
   auto f_is_below_s =
       f.top > s.top + s.height && !FloatEquals(f.top, s.top + s.height);
-  DEBUGLOG("right of " << f_is_to_the_right_of_s << ", left of "
-                       << f_is_to_the_left_of_s << ", below of " << f_is_below_s
-                       << ", above of " << f_is_above_s)
   return !(f_is_to_the_right_of_s || f_is_to_the_left_of_s || f_is_above_s ||
            f_is_below_s);
 }

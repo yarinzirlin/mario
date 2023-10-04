@@ -42,11 +42,11 @@ void Game::Init() {
   window_->setFramerateLimit(FRAMERATE_LIMIT);
   current_frame_ = 0;
 
-  // m_backgroundTexture.loadFromFile("resources/backgrounds/4.png");
-  // m_backgroundSprite.setTexture(m_backgroundTexture);
-  // m_backgroundSprite.setScale(
-  //     m_window->getSize().x / m_backgroundSprite.getLocalBounds().width,
-  //     m_window->getSize().y / m_backgroundSprite.getLocalBounds().height);
+  background_texture_.loadFromFile("resources/backgrounds/4.png");
+  background_sprite_.setTexture(background_texture_);
+  background_sprite_.setScale(
+      window_->getSize().x / background_sprite_.getLocalBounds().width,
+      window_->getSize().y / background_sprite_.getLocalBounds().height);
 
   SpawnPlayer();
   DEBUGLOG("Initialization finished")
@@ -57,21 +57,7 @@ tmx::Map map;
 void Game::Run() {
   map.load("assets/maps/test.tmx");
   DEBUGLOG(map.getTileSize())
-  auto ts = map.getTilesets();
-  for (auto t : ts) {
-    auto margin = t.getMargin();
-    DEBUGLOG("margin" << margin)
-    auto spacing = t.getSpacing();
-    DEBUGLOG("spacing" << spacing)
-    auto props = t.getProperties();
-    for (auto p : props) {
-      DEBUGLOG("prop " << p.getName())
-    }
-    auto tilesize = t.getTileSize();
-    DEBUGLOG("tilesize" << tilesize)
-    auto tileone = t.getTile(1);
-    DEBUGLOG("tileone" << tileone)
-  }
+
   while (window_->isOpen()) {
     entities_->update();
     sf::Event event;
@@ -282,8 +268,6 @@ bool Game::IsBottomCollider(const std::shared_ptr<Entity> entity,
   auto prev_bottom = entity->prev_bb().top + entity->prev_bb().height;
   auto new_bottom = entity->bb().top + entity->bb().height;
   auto collider_top = collidingObject.getAABB().top;
-  DEBUGLOG("prev: " << prev_bottom << " new: " << new_bottom
-                    << " collider: " << collider_top)
   return FloatEquals(new_bottom, collider_top) ||
          (prev_bottom <= collider_top && new_bottom > collider_top);
 }
@@ -383,7 +367,7 @@ void Game::sMovement() {
       e->transform_->velocity_.y += GRAVITY_ACCELERATION;
     }
   }
-  // UpdateStandbyPortal();
+  UpdateStandbyPortal();
   UpdateMidairPortals();
 }
 
@@ -419,7 +403,7 @@ void Game::UpdateMidairPortals() {
 void Game::SpawnPlayer() {
   player_ = entities_->addPlayer();
   player_->transform_->pos_ = Vec2(5, 5);
-  // sbportal_ = entities_->addEntity<StandbyPortal>();
+  sbportal_ = entities_->addEntity<StandbyPortal>();
 }
 
 void Game::firePortal() {
@@ -430,9 +414,9 @@ void Game::firePortal() {
   auto portal = entities_->addEntity<MidairPortal>();
   portal->transform_->pos_ = sbportal_->transform_->pos_;
   portal->transform_->velocity_ = Vec2(PORTAL_VELOCITY, 0);
-  // if (portal->portal_color() != sbportal_->portal_color()) {
-  //   portal->AlternateColor();
-  // }
+  if (portal->portal_color() != sbportal_->portal_color()) {
+    portal->AlternateColor();
+  }
 
   if (player_->transform_->flipped_) {
     portal->transform_->velocity_ *= -1;
