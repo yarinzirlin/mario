@@ -144,7 +144,6 @@ void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
 
 void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
                       const tmx::Map &map) {
-  DEBUGLOG("~~~~In collision~~~~")
   const auto &collision_object_group =
       collision_layer->getLayerAs<tmx::ObjectGroup>();
 
@@ -169,15 +168,11 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
       }
       colliders.push_back(collider);
     }
-    if (e1->tag() == "player") {
-      DEBUGLOG("colliders:" << colliders.size())
-    }
     for (auto collider : colliders) {
       HandleEntityCollisionWithMap(e1, collider);
     }
 
     if (!has_bottom_collider) {
-      DEBUGLOG(e1->tag() << " no bottom collider")
       e1->set_midair(true);
     }
     if (IsEntityOutOfBounds(e1, map)) {
@@ -233,32 +228,33 @@ void Game::HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity) {
 
 void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                         const Collider &collider) {
-  DEBUGLOG(entity->tag() << " is colliding with "
-                         << collider.collidingObject.getPosition())
   switch (collider.direction) {
-  case Top:
-    entity->transform_->pos_.y = collider.collidingObject.getAABB().top +
-                                 collider.collidingObject.getAABB().height;
-    entity->transform_->velocity_.y = 0;
-    break;
-  case Bottom:
-    PrintFloatRect(entity->bb());
-    entity->transform_->pos_.y =
-        collider.collidingObject.getAABB().top - entity->bb().height;
-    entity->transform_->velocity_.y = 0;
-    entity->set_midair(false);
-    break;
-
   case Left:
+    DEBUGLOG(entity->tag() << " LEFT")
     entity->transform_->pos_.x = collider.collidingObject.getAABB().left +
                                  collider.collidingObject.getAABB().width + 1;
     entity->transform_->velocity_.x = 0;
     break;
   case Right:
+    DEBUGLOG(entity->tag() << " RIGHT")
     entity->transform_->pos_.x =
         collider.collidingObject.getAABB().left - entity->bb().width - 1;
     entity->transform_->velocity_.x = 0;
 
+    break;
+
+  case Top:
+    DEBUGLOG(entity->tag() << " TOP")
+    entity->transform_->pos_.y = collider.collidingObject.getAABB().top +
+                                 collider.collidingObject.getAABB().height;
+    entity->transform_->velocity_.y = 0;
+    break;
+  case Bottom:
+    // DEBUGLOG(entity->tag() << " BOTTOM")
+    entity->transform_->pos_.y =
+        collider.collidingObject.getAABB().top - entity->bb().height;
+    entity->transform_->velocity_.y = 0;
+    entity->set_midair(false);
     break;
   }
 }
@@ -266,8 +262,8 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
 bool Game::IsBottomCollider(const std::shared_ptr<Entity> entity,
                             const tmx::Object &collidingObject) {
 
-  auto prev_bottom = entity->prev_bb().top + entity->prev_bb().height;
   auto new_bottom = entity->bb().top + entity->bb().height;
+  auto prev_bottom = entity->prev_bb().top + entity->prev_bb().height;
   auto collider_top = collidingObject.getAABB().top;
   return FloatEquals(new_bottom, collider_top) ||
          (prev_bottom <= collider_top && new_bottom > collider_top);

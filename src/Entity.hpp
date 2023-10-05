@@ -87,7 +87,6 @@ public:
     if (midair() && midair_animation_) {
       animation_ = midair_animation_;
     } else if (transform_->velocity_.x != 0 && moving_animation_) {
-      DEBUGLOG("here")
       animation_ = moving_animation_;
     }
     animation_->Update(current_frame);
