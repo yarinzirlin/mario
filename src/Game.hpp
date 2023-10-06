@@ -44,6 +44,9 @@ class Game {
   void RenderEntityOutline(std::shared_ptr<Entity> e);
   void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer,
                   const tmx::Map &map);
+
+  void sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
+                const tmx::Map &map);
   void SpawnPlayer();
   void UpdateStandbyPortal();
   void UpdateMidairPortals();

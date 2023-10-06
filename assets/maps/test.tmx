@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="34">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="38">
  <tileset firstgid="1" source="mario.tsx"/>
  <layer id="1" name="Tile Layer 1" width="80" height="45">
   <data encoding="csv">
@@ -56,6 +56,10 @@
   <object id="26" x="510.917" y="465.176" width="0.863036" height="90.6188"/>
   <object id="27" x="880.297" y="465.176" width="0.863036" height="88.0297"/>
   <object id="28" x="912.158" y="465.309" width="1.27307" height="91.6614"/>
+  <object id="34" x="879.694" y="465.945" width="1.27307" height="91.0248"/>
+  <object id="35" x="544.876" y="464.672" width="0.636537" height="93.571"/>
+  <object id="36" x="511.776" y="465.945" width="0.636537" height="92.2979"/>
+  <object id="37" x="880.968" y="466.582" width="0.636537" height="90.3883"/>
  </objectgroup>
  <objectgroup id="2" name="Collision">
   <object id="1" x="1.83184" y="558.393" width="1276.79" height="5.49551"/>

@@ -14,6 +14,7 @@
 #include <memory>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
+#include <tmxlite/Object.hpp>
 #include <tmxlite/ObjectGroup.hpp>
 #include <tmxlite/TileLayer.hpp>
 
@@ -53,6 +54,7 @@ void Game::Init() {
 }
 
 tmx::Map map;
+#define PORTALLABLE_LAYER "Portallable"
 #define COLLISION_LAYER "Collision"
 void Game::Run() {
   map.load("assets/maps/test.tmx");
@@ -69,6 +71,11 @@ void Game::Run() {
     }
     sMovement();
     const auto &layers = map.getLayers();
+    for (const auto &layer : layers) {
+      if (layer->getName() == PORTALLABLE_LAYER) {
+        sPortals(layer, map);
+      }
+    }
     for (const auto &layer : layers) {
       if (layer->getName() == COLLISION_LAYER)
         sCollision(layer, map);
@@ -140,6 +147,21 @@ void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
   outline.setOutlineColor(sf::Color::Black);
   outline.setOutlineThickness(1.0f);
   window_->draw(outline);
+}
+
+void Game::sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
+                    const tmx::Map &map) {
+
+  const auto &portallable_object_group =
+      portallable_layer->getLayerAs<tmx::ObjectGroup>();
+  for (auto e : entities_->getEntities("midair_portal")) {
+    auto colliding_objects = GetObjGroupColliders(e, portallable_object_group);
+    std::vector<Collider> colliders;
+    for (auto obj : colliding_objects) {
+      auto collider = IdentifyCollider(e, obj);
+      colliders.push_back(collider);
+    }
+  }
 }
 
 void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
@@ -230,13 +252,13 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                         const Collider &collider) {
   switch (collider.direction) {
   case Left:
-    DEBUGLOG(entity->tag() << " LEFT")
+    // DEBUGLOG(entity->tag() << " LEFT")
     entity->transform_->pos_.x = collider.collidingObject.getAABB().left +
                                  collider.collidingObject.getAABB().width + 1;
     entity->transform_->velocity_.x = 0;
     break;
   case Right:
-    DEBUGLOG(entity->tag() << " RIGHT")
+    // DEBUGLOG(entity->tag() << " RIGHT")
     entity->transform_->pos_.x =
         collider.collidingObject.getAABB().left - entity->bb().width - 1;
     entity->transform_->velocity_.x = 0;
@@ -244,7 +266,7 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
     break;
 
   case Top:
-    DEBUGLOG(entity->tag() << " TOP")
+    // DEBUGLOG(entity->tag() << " TOP")
     entity->transform_->pos_.y = collider.collidingObject.getAABB().top +
                                  collider.collidingObject.getAABB().height;
     entity->transform_->velocity_.y = 0;
