@@ -3,13 +3,63 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "test.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "1.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 0.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 922,
+                "y": 641
+            }
+        },
+        "2.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 654.6666666666667,
+                "y": 460.66666666666663
+            }
+        },
+        "3.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 573.3333333333333,
+                "y": 392.66666666666663
+            }
+        },
+        "4.tmx": {
+            "scale": 0.7785546875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 640.9312126837591,
+                "y": 360.282976268125
+            }
+        },
+        "main.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 622.6666666666667,
+                "y": 436.66666666666663
+            }
+        },
         "mario.tsx": {
-            "scaleInDock": 1,
-            "scaleInEditor": 1
+            "scaleInDock": 1.1295,
+            "scaleInEditor": 3.34
         },
         "mario2.tsx": {
             "scaleInDock": 1,
@@ -20,14 +70,11 @@
             "scaleInEditor": 3.34
         },
         "test.tmx": {
-            "expandedObjectLayers": [
-                2
-            ],
-            "scale": 1.522,
+            "scale": 0.3231,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 133.70565045992115,
-                "y": 562.4178712220762
+                "x": 623.6459300526152,
+                "y": 578.7681832250076
             }
         },
         "test1.tmx": {
@@ -49,13 +96,18 @@
     "map.tileWidth": 16,
     "map.width": 80,
     "openFiles": [
+        "mario.tsx",
+        "test.tmx"
     ],
     "project": "portal2d.tiled-project",
     "recentFiles": [
+        "3.tmx",
+        "2.tmx",
+        "1.tmx",
+        "mario.tsx",
+        "test.tmx",
         "player.tsx",
         "test1.tmx",
-        "test.tmx",
-        "mario.tsx",
         "mario2.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
