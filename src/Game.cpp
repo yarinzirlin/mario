@@ -28,6 +28,7 @@ Game::Game() {
   entities_ = std::make_shared<EntityManager>();
   window_ =
       std::make_shared<sf::RenderWindow>(sf::VideoMode(1280, 720), "Portal 2D");
+  current_level_index_ = 0;
   paused_ = true;
   running_ = false;
   font_.loadFromFile("assets/fonts/arial.ttf");
@@ -49,17 +50,16 @@ void Game::Init() {
   //     window_->getSize().x / background_sprite_.getLocalBounds().width,
   // window_->getSize().y / background_sprite_.getLocalBounds().height);
 
+  map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
   SpawnPlayer();
   DEBUGLOG("Initialization finished")
 }
 
-tmx::Map map;
 #define PORTALLABLE_LAYER "Portallable"
 #define COLLISION_LAYER "Collision"
 #define DEATH_LAYER "Death"
+#define LEVEL_ADVANCEMENT_LAYER "NextLevel"
 void Game::Run() {
-  map.load("assets/maps/2.tmx");
-  DEBUGLOG(map.getTileSize())
 
   while (window_->isOpen()) {
     entities_->update();
@@ -71,22 +71,25 @@ void Game::Run() {
       sUserInput(event);
     }
     sMovement();
-    const auto &layers = map.getLayers();
+    const auto &layers = map_.getLayers();
     for (const auto &layer : layers) {
       if (layer->getName() == PORTALLABLE_LAYER) {
-        sPortals(layer, map);
+        sPortals(layer, map_);
       }
     }
     tmx::ObjectGroup collision_layer;
     tmx::ObjectGroup death_layer;
+    tmx::ObjectGroup advancement_layer;
 
     for (const auto &layer : layers) {
       if (layer->getName() == COLLISION_LAYER)
         collision_layer = layer->getLayerAs<tmx::ObjectGroup>();
       if (layer->getName() == DEATH_LAYER)
         death_layer = layer->getLayerAs<tmx::ObjectGroup>();
+      if (layer->getName() == LEVEL_ADVANCEMENT_LAYER)
+        advancement_layer = layer->getLayerAs<tmx::ObjectGroup>();
     }
-    sCollision(collision_layer, death_layer, map);
+    sCollision(collision_layer, death_layer, advancement_layer, map_);
     sRender();
     current_frame_++;
   }
@@ -94,7 +97,7 @@ void Game::Run() {
 
 void Game::sRender() {
   window_->clear();
-  MapLayer layerZero(map, 0);
+  MapLayer layerZero(map_, 0);
   // MapLayer layerOne(map, 1);
   window_->draw(layerZero);
   // m_window->draw(layerOne);
@@ -173,6 +176,7 @@ void Game::sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
 
 void Game::sCollision(const tmx::ObjectGroup &collision_layer,
                       const tmx::ObjectGroup &death_layer,
+                      const tmx::ObjectGroup &advancement_layer,
                       const tmx::Map &map) {
 
   for (auto e1 : entities_->getEntities()) {
@@ -203,6 +207,12 @@ void Game::sCollision(const tmx::ObjectGroup &collision_layer,
     auto colliding_death_objects = GetObjGroupColliders(e1, death_layer);
     if (colliding_death_objects.size() > 0) {
       HandleEntityCollisionWithDeathLayer(e1);
+    }
+
+    auto colliding_advancement_objects =
+        GetObjGroupColliders(e1, advancement_layer);
+    if (colliding_advancement_objects.size() > 0) {
+      HandleEntityCollisionWithAdvancementLayer(e1);
     }
 
     if (!has_bottom_collider) {
@@ -267,6 +277,16 @@ void Game::HandleEntityCollisionWithDeathLayer(
   }
 }
 
+void Game::HandleEntityCollisionWithAdvancementLayer(
+    const std::shared_ptr<Entity> entity) {
+  current_level_index_++;
+  if (current_level_index_ >= levels_.size()) {
+    // HandleGameFinished
+  }
+  map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
+  player_->transform_->pos_ = SpawnPoint;
+  player_->transform_->velocity_ = {0.0, 0.0};
+}
 void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                         const Collider &collider) {
   switch (collider.direction) {

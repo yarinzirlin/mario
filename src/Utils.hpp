@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/Types.hpp>
@@ -74,4 +75,10 @@ static inline tmx::Colour ColourFromString(std::string str) {
   DEBUGLOG(str << ": not a valid colour string")
   return {};
 }
+
+static std::string LevelIndexToPath(int index) {
+  return std::string("assets/maps/") + std::to_string(index + 1) +
+         std::string(".tmx");
+}
+
 #endif

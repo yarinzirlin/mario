@@ -12,11 +12,11 @@
             "expandedObjectLayers": [
                 3
             ],
-            "scale": 0.5,
-            "selectedLayer": 1,
+            "scale": 1.5528,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 922,
-                "y": 641
+                "x": 1173.0422462648119,
+                "y": 207.36733642452344
             }
         },
         "2.tmx": {
@@ -24,11 +24,11 @@
                 3,
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 1,
+            "scale": 1.7591,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 654.6666666666667,
-                "y": 460.66666666666663
+                "x": 1180.4331760559376,
+                "y": 461.5996816553919
             }
         },
         "3.tmx": {
@@ -36,22 +36,22 @@
                 3,
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 2,
+            "scale": 1.8421,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 785.3333333333333,
-                "y": 392.66666666666663
+                "x": 1173.389066825905,
+                "y": 172.08620596058844
             }
         },
         "4.tmx": {
             "expandedObjectLayers": [
                 2
             ],
-            "scale": 0.75,
-            "selectedLayer": 1,
+            "scale": 1.2182,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 343.99999999999994,
-                "y": 508.66666666666663
+                "x": 918.9788212116237,
+                "y": 249.5485142012806
             }
         },
         "5.tmx": {

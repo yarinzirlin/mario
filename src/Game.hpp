@@ -9,6 +9,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
+#include <string>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Object.hpp>
 #include <tmxlite/ObjectGroup.hpp>
@@ -26,6 +27,10 @@ const Vec2 SpawnPoint = {5, 5};
 
 class Game {
   std::shared_ptr<sf::RenderWindow> window_;
+  const std::vector<std::string> levels_ = {"1.tmx", "2.tmx", "3.tmx", "4.tmx",
+                                            "5.tmx"};
+  int current_level_index_;
+  tmx::Map map_;
   std::shared_ptr<EntityManager> entities_;
   std::shared_ptr<Player> player_;
   std::shared_ptr<StandbyPortal> sbportal_;
@@ -47,7 +52,9 @@ class Game {
   void DrawInput();
   void RenderEntityOutline(std::shared_ptr<Entity> e);
   void sCollision(const tmx::ObjectGroup &collision_layer,
-                  const tmx::ObjectGroup &death_layer, const tmx::Map &map);
+                  const tmx::ObjectGroup &death_layer,
+                  const tmx::ObjectGroup &advancement_layer,
+                  const tmx::Map &map);
 
   void sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
                 const tmx::Map &map);
@@ -81,6 +88,8 @@ class Game {
   void Init();
   void
   HandleEntityCollisionWithDeathLayer(const std::shared_ptr<Entity> entity);
+  void HandleEntityCollisionWithAdvancementLayer(
+      const std::shared_ptr<Entity> entity);
 
 public:
   Game();
