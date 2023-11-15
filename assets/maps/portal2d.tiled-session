@@ -24,21 +24,38 @@
                 3
             ],
             "scale": 0.75,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
                 "x": 654.6666666666667,
                 "y": 460.66666666666663
             }
         },
         "3.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 573.3333333333333,
+                "x": 570.6666666666667,
                 "y": 392.66666666666663
             }
         },
         "4.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 313.99999999999994,
+                "y": 581
+            }
+        },
+        "5.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
             "scale": 0.7785546875,
             "selectedLayer": 0,
             "viewCenter": {

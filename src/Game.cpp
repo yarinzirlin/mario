@@ -57,7 +57,7 @@ tmx::Map map;
 #define PORTALLABLE_LAYER "Portallable"
 #define COLLISION_LAYER "Collision"
 void Game::Run() {
-  map.load("assets/maps/3.tmx");
+  map.load("assets/maps/5.tmx");
   DEBUGLOG(map.getTileSize())
 
   while (window_->isOpen()) {
