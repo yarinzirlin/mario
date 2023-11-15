@@ -56,8 +56,9 @@ void Game::Init() {
 tmx::Map map;
 #define PORTALLABLE_LAYER "Portallable"
 #define COLLISION_LAYER "Collision"
+#define DEATH_LAYER "Death"
 void Game::Run() {
-  map.load("assets/maps/5.tmx");
+  map.load("assets/maps/2.tmx");
   DEBUGLOG(map.getTileSize())
 
   while (window_->isOpen()) {
@@ -76,10 +77,16 @@ void Game::Run() {
         sPortals(layer, map);
       }
     }
+    tmx::ObjectGroup collision_layer;
+    tmx::ObjectGroup death_layer;
+
     for (const auto &layer : layers) {
       if (layer->getName() == COLLISION_LAYER)
-        sCollision(layer, map);
+        collision_layer = layer->getLayerAs<tmx::ObjectGroup>();
+      if (layer->getName() == DEATH_LAYER)
+        death_layer = layer->getLayerAs<tmx::ObjectGroup>();
     }
+    sCollision(collision_layer, death_layer, map);
     sRender();
     current_frame_++;
   }
@@ -164,10 +171,9 @@ void Game::sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
   }
 }
 
-void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
+void Game::sCollision(const tmx::ObjectGroup &collision_layer,
+                      const tmx::ObjectGroup &death_layer,
                       const tmx::Map &map) {
-  const auto &collision_object_group =
-      collision_layer->getLayerAs<tmx::ObjectGroup>();
 
   for (auto e1 : entities_->getEntities()) {
     for (auto e2 : entities_->getEntities()) {
@@ -180,7 +186,7 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
       }
     }
 
-    auto colliding_objects = GetObjGroupColliders(e1, collision_object_group);
+    auto colliding_objects = GetObjGroupColliders(e1, collision_layer);
     std::vector<Collider> colliders;
     bool has_bottom_collider = false;
     for (auto obj : colliding_objects) {
@@ -192,6 +198,11 @@ void Game::sCollision(const std::unique_ptr<tmx::Layer> &collision_layer,
     }
     for (auto collider : colliders) {
       HandleEntityCollisionWithMap(e1, collider);
+    }
+
+    auto colliding_death_objects = GetObjGroupColliders(e1, death_layer);
+    if (colliding_death_objects.size() > 0) {
+      HandleEntityCollisionWithDeathLayer(e1);
     }
 
     if (!has_bottom_collider) {
@@ -248,17 +259,23 @@ void Game::HandleEntityOutOfBounds(const std::shared_ptr<Entity> entity) {
   }
 }
 
+void Game::HandleEntityCollisionWithDeathLayer(
+    const std::shared_ptr<Entity> entity) {
+  if (entity->tag() == "player") {
+    entity->transform_->pos_ = SpawnPoint;
+    entity->transform_->velocity_ = {0.0, 0.0};
+  }
+}
+
 void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
                                         const Collider &collider) {
   switch (collider.direction) {
   case Left:
-    // DEBUGLOG(entity->tag() << " LEFT")
     entity->transform_->pos_.x = collider.collidingObject.getAABB().left +
                                  collider.collidingObject.getAABB().width + 1;
     entity->transform_->velocity_.x = 0;
     break;
   case Right:
-    // DEBUGLOG(entity->tag() << " RIGHT")
     entity->transform_->pos_.x =
         collider.collidingObject.getAABB().left - entity->bb().width - 1;
     entity->transform_->velocity_.x = 0;
@@ -266,13 +283,11 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
     break;
 
   case Top:
-    // DEBUGLOG(entity->tag() << " TOP")
     entity->transform_->pos_.y = collider.collidingObject.getAABB().top +
                                  collider.collidingObject.getAABB().height;
     entity->transform_->velocity_.y = 0;
     break;
   case Bottom:
-    // DEBUGLOG(entity->tag() << " BOTTOM")
     entity->transform_->pos_.y =
         collider.collidingObject.getAABB().top - entity->bb().height;
     entity->transform_->velocity_.y = 0;
@@ -410,7 +425,7 @@ void Game::UpdateStandbyPortal() {
 
 void Game::SpawnPlayer() {
   player_ = entities_->addPlayer();
-  player_->transform_->pos_ = Vec2(5, 5);
+  player_->transform_->pos_ = SpawnPoint;
   sbportal_ = entities_->addEntity<StandbyPortal>();
 }
 

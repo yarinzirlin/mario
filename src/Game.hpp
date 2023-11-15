@@ -3,6 +3,7 @@
 
 #include "Entity.hpp"
 #include "EntityManager.hpp"
+#include "Vec2.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -10,6 +11,7 @@
 #include <SFML/Window/Event.hpp>
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Object.hpp>
+#include <tmxlite/ObjectGroup.hpp>
 
 #define PORTAL_COOLDOWN_TICKS 60
 
@@ -19,6 +21,8 @@ struct Collider {
   const tmx::Object &collidingObject;
   Direction direction;
 };
+
+const Vec2 SpawnPoint = {5, 5};
 
 class Game {
   std::shared_ptr<sf::RenderWindow> window_;
@@ -42,8 +46,8 @@ class Game {
                 unsigned int size);
   void DrawInput();
   void RenderEntityOutline(std::shared_ptr<Entity> e);
-  void sCollision(const std::unique_ptr<tmx::Layer> &collisionLayer,
-                  const tmx::Map &map);
+  void sCollision(const tmx::ObjectGroup &collision_layer,
+                  const tmx::ObjectGroup &death_layer, const tmx::Map &map);
 
   void sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
                 const tmx::Map &map);
@@ -75,6 +79,8 @@ class Game {
   bool ShouldPlaceStandingEntityOnCollider(const std::shared_ptr<Entity> entity,
                                            const tmx::Object &collider);
   void Init();
+  void
+  HandleEntityCollisionWithDeathLayer(const std::shared_ptr<Entity> entity);
 
 public:
   Game();
