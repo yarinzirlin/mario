@@ -9,46 +9,57 @@
     ],
     "fileStates": {
         "0.tmx": {
-            "scale": 0.7785546875,
+            "scale": 0.4607,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 640.9312126837591,
-                "y": 360.282976268125
+                "x": 628.3915780334275,
+                "y": 310.3972216192751
             }
         },
         "1.tmx": {
             "expandedObjectLayers": [
-                3
+                3,
+                4
             ],
-            "scale": 1.5528,
-            "selectedLayer": 2,
+            "scale": 0.6239,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1173.0422462648119,
-                "y": 207.36733642452344
+                "x": 244.43019714697866,
+                "y": 435.9673024523161
             }
         },
         "2.tmx": {
             "expandedObjectLayers": [
+                5,
                 3,
                 4
             ],
-            "scale": 1.7591,
-            "selectedLayer": 2,
+            "scale": 0.8708,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 1180.4331760559376,
-                "y": 461.5996816553919
+                "x": 1361.3918236104732,
+                "y": 401.92926045016077
             }
         },
         "3.tmx": {
             "expandedObjectLayers": [
+                5,
                 3,
                 4
             ],
-            "scale": 1.8421,
-            "selectedLayer": 3,
+            "scale": 0.9419,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1173.389066825905,
-                "y": 172.08620596058844
+                "x": 963.4780762288991,
+                "y": 477.75772374986735
+            }
+        },
+        "4 copy.tmx": {
+            "scale": 0.7785546875,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 640.9312126837591,
+                "y": 360.282976268125
             }
         },
         "4.tmx": {
@@ -56,11 +67,11 @@
                 2,
                 3
             ],
-            "scale": 1.2182,
-            "selectedLayer": 2,
+            "scale": 0.6415,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1109.0132983089804,
-                "y": 317.27138400919387
+                "x": 1035.8534684333592,
+                "y": 372.56430241621194
             }
         },
         "5.tmx": {
@@ -68,30 +79,31 @@
                 2,
                 4
             ],
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 0.5425,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 711,
-                "y": 361.5
+                "x": 694.0092165898618,
+                "y": 571.4285714285713
             }
         },
         "empty.tmx": {
             "scale": 0.5568,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 917.7442528735634,
-                "y": 665.4094827586208
+                "x": 500.1795977011494,
+                "y": 515.4454022988506
             }
         },
         "main.tmx": {
             "expandedObjectLayers": [
-                2
+                2,
+                3
             ],
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 622.6666666666667,
-                "y": 436.66666666666663
+                "x": 334,
+                "y": 481.33333333333337
             }
         },
         "mario.tsx": {
@@ -138,6 +150,7 @@
     ],
     "project": "portal2d.tiled-project",
     "recentFiles": [
+        "4 copy.tmx",
         "3.tmx",
         "2.tmx",
         "1.tmx",

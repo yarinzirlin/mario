@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="32">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="34">
  <tileset firstgid="1" source="mario.tsx"/>
  <layer id="1" name="Tile Layer 1" width="80" height="45">
   <data encoding="csv">
@@ -58,6 +58,8 @@
   <object id="28" x="1122.59" y="238.904" width="41.1018"/>
   <object id="29" x="1186.81" y="128.443" width="75.7814" height="1.28443"/>
   <object id="30" x="688.333" y="431.667" width="191.333" height="0.333333"/>
+  <object id="32" x="1.60282" y="1.60282" width="1.60282" height="644.334"/>
+  <object id="33" x="1272.64" y="4.80846" width="3.20564" height="620.292"/>
  </objectgroup>
  <objectgroup id="4" name="NextLevel">
   <object id="31" x="1217.16" y="80.4997" width="29.6239" height="47.0118"/>

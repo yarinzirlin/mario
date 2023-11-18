@@ -31,7 +31,26 @@ Game::Game() {
   current_level_index_ = 0;
   paused_ = true;
   running_ = false;
+  hearts_ = 3;
   font_.loadFromFile("assets/fonts/arial.ttf");
+  auto window_size = window_->getSize();
+  sf::Image heart_img;
+  heart_img.loadFromFile("assets/general/heart.png");
+  heart_sprites_ = {std::make_shared<sf::Sprite>(),
+                    std::make_shared<sf::Sprite>(),
+                    std::make_shared<sf::Sprite>()};
+  heart_texture_.loadFromImage(heart_img);
+
+  for (int i = 0; i < heart_sprites_.size(); i++) {
+
+    heart_sprites_[i]->setTexture(heart_texture_);
+    heart_sprites_[i]->setScale(0.03, 0.03);
+
+    heart_sprites_[i]->setPosition(
+        window_size.x - window_size.x / 20.f -
+            (i * heart_sprites_[i]->getGlobalBounds().width),
+        window_size.y / 100.f);
+  }
   Init();
 }
 
@@ -122,6 +141,7 @@ void Game::sRender() {
 #endif
     window_->draw(*e->sprite());
   }
+  RenderHearts();
   window_->display();
 }
 
@@ -193,12 +213,12 @@ void Game::sCollision(const tmx::ObjectGroup &collision_layer,
     auto colliding_objects = GetObjGroupColliders(e1, collision_layer);
     std::vector<Collider> colliders;
     bool has_bottom_collider = false;
-    for (auto obj : colliding_objects) {
-      auto collider = IdentifyCollider(e1, obj);
-      if (collider.direction == Bottom) {
+    for (const auto &obj : colliding_objects) {
+      auto identified_collider = IdentifyCollider(e1, obj);
+      if (identified_collider.direction == Bottom) {
         has_bottom_collider = true;
       }
-      colliders.push_back(collider);
+      colliders.push_back(identified_collider);
     }
     for (auto collider : colliders) {
       HandleEntityCollisionWithMap(e1, collider);
@@ -239,9 +259,9 @@ Game::GetObjGroupColliders(std::shared_ptr<Entity> entity,
 Collider Game::IdentifyCollider(const std::shared_ptr<Entity> entity,
                                 const tmx::Object &collidingObject) {
   Collider collider = {.collidingObject = collidingObject};
-  if (IsBottomCollider(entity, collidingObject))
+  if (IsBottomCollider(entity, collidingObject)) {
     collider.direction = Bottom;
-  else if (IsTopCollider(entity, collidingObject))
+  } else if (IsTopCollider(entity, collidingObject))
     collider.direction = Top;
   else if (IsRightCollider(entity, collidingObject))
     collider.direction = Right;
@@ -274,6 +294,11 @@ void Game::HandleEntityCollisionWithDeathLayer(
   if (entity->tag() == "player") {
     entity->transform_->pos_ = SpawnPoint;
     entity->transform_->velocity_ = {0.0, 0.0};
+    hearts_--;
+  }
+
+  if (hearts_ == 0) {
+    ResetGame();
   }
 }
 
@@ -281,9 +306,13 @@ void Game::HandleEntityCollisionWithAdvancementLayer(
     const std::shared_ptr<Entity> entity) {
   current_level_index_++;
   if (current_level_index_ >= levels_.size()) {
-    // HandleGameFinished
+    current_level_index_ = 0;
+    hearts_ = 3;
   }
-  map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
+  auto next_level_path =
+      "assets/maps/" + std::string(levels_[current_level_index_]);
+  DEBUGLOG(next_level_path)
+  map_.load(next_level_path);
   player_->transform_->pos_ = SpawnPoint;
   player_->transform_->velocity_ = {0.0, 0.0};
 }
@@ -312,6 +341,8 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
         collider.collidingObject.getAABB().top - entity->bb().height;
     entity->transform_->velocity_.y = 0;
     entity->set_midair(false);
+    break;
+  case Undetermined:
     break;
   }
 }
@@ -343,7 +374,7 @@ bool Game::IsLeftCollider(const std::shared_ptr<Entity> entity,
   auto collider_right =
       collidingObject.getAABB().left + collidingObject.getAABB().width;
   return FloatEquals(new_left, collider_right) ||
-         (prev_left <= collider_right && new_left > collider_right);
+         (prev_left >= collider_right && new_left < collider_right);
 }
 bool Game::IsRightCollider(const std::shared_ptr<Entity> entity,
                            const tmx::Object &collidingObject) {
@@ -425,6 +456,7 @@ void Game::sMovement() {
 }
 
 void Game::UpdateStandbyPortal() {
+  return;
   int x_offset = player_->bb().width + sbportal_->bb().width / 2.25f;
   if (player_->transform_->flipped_) {
     x_offset -= player_->bb().width;
@@ -446,7 +478,7 @@ void Game::UpdateStandbyPortal() {
 void Game::SpawnPlayer() {
   player_ = entities_->addPlayer();
   player_->transform_->pos_ = SpawnPoint;
-  sbportal_ = entities_->addEntity<StandbyPortal>();
+  // sbportal_ = entities_->addEntity<StandbyPortal>();
 }
 
 void Game::firePortal() {
@@ -464,4 +496,15 @@ void Game::firePortal() {
   if (player_->transform_->flipped_) {
     portal->transform_->velocity_ *= -1;
   }
+}
+
+void Game::RenderHearts() {
+  for (int i = 0; i < hearts_; i++) {
+    window_->draw(*heart_sprites_[i]);
+  }
+}
+void Game::ResetGame() {
+  hearts_ = 3;
+  current_level_index_ = 0;
+  map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
 }

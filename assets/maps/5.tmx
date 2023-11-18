@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="35">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="80" height="45" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="39">
  <tileset firstgid="1" source="mario.tsx"/>
- <objectgroup id="4" name="NextLevel">
-  <object id="33" x="624.567" y="48.514" width="30.1684" height="44.8449"/>
- </objectgroup>
  <layer id="1" name="Tile Layer 1" width="80" height="45">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -53,6 +50,9 @@
 142,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,143,144
 </data>
  </layer>
+ <objectgroup id="4" name="NextLevel">
+  <object id="33" x="624.567" y="48.514" width="30.1684" height="44.8449"/>
+ </objectgroup>
  <objectgroup id="2" name="Collision">
   <object id="22" x="1.33333" y="640" width="1272" height="1.33333"/>
   <object id="25" x="593.407" y="545.883" width="92.4791"/>
@@ -60,5 +60,7 @@
   <object id="27" x="597.261" y="318.539" width="83.488" height="3.85329"/>
   <object id="28" x="594.692" y="206.793" width="87.3413" height="1.28443"/>
   <object id="29" x="594.692" y="95.0479" width="89.9102" height="1.28443"/>
+  <object id="37" x="1.84332" y="1.84332" height="628.571"/>
+  <object id="38" x="1277.42" y="1.84332" width="1.84332" height="639.631"/>
  </objectgroup>
 </map>

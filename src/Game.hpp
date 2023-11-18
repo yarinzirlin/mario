@@ -27,8 +27,8 @@ const Vec2 SpawnPoint = {5, 5};
 
 class Game {
   std::shared_ptr<sf::RenderWindow> window_;
-  const std::vector<std::string> levels_ = {"1.tmx", "2.tmx", "3.tmx", "4.tmx",
-                                            "5.tmx"};
+  const std::vector<std::string> levels_ = {"main.tmx", "1.tmx", "2.tmx",
+                                            "3.tmx",    "4.tmx", "5.tmx"};
   int current_level_index_;
   tmx::Map map_;
   std::shared_ptr<EntityManager> entities_;
@@ -40,8 +40,10 @@ class Game {
   bool running_ = false;
   unsigned int last_portal_switch_ = 0;
   unsigned int last_portal_fired_ = 0;
-
   unsigned int current_frame_ = 0;
+  unsigned int hearts_;
+  sf::Texture heart_texture_;
+  std::vector<std::shared_ptr<sf::Sprite>> heart_sprites_;
   sf::Font font_;
 
   void sMovement();
@@ -90,6 +92,8 @@ class Game {
   HandleEntityCollisionWithDeathLayer(const std::shared_ptr<Entity> entity);
   void HandleEntityCollisionWithAdvancementLayer(
       const std::shared_ptr<Entity> entity);
+  void RenderHearts();
+  void ResetGame();
 
 public:
   Game();
