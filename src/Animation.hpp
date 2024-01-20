@@ -1,5 +1,5 @@
-#ifndef PORTAL2D_ANIMATION_H_
-#define PORTAL2D_ANIMATION_H_
+#ifndef MARIO_ANIMATION_H_
+#define MARIO_ANIMATION_H_
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>

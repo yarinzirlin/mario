@@ -1,5 +1,5 @@
-#ifndef PORTAL2D_UTILS_H_
-#define PORTAL2D_UTILS_H_
+#ifndef MARIO_UTILS_H_
+#define MARIO_UTILS_H_
 
 #include <SFML/Graphics/Rect.hpp>
 #include <iomanip>

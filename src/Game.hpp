@@ -1,5 +1,5 @@
-#ifndef PORTAL2D_GAME_H_
-#define PORTAL2D_GAME_H_
+#ifndef MARIO_GAME_H_
+#define MARIO_GAME_H_
 
 #include "Entity.hpp"
 #include "EntityManager.hpp"
@@ -34,13 +34,10 @@ class Game {
   tmx::Map map_;
   std::shared_ptr<EntityManager> entities_;
   std::shared_ptr<Player> player_;
-  std::shared_ptr<StandbyPortal> sbportal_;
   sf::Texture background_texture_;
   sf::Sprite background_sprite_;
   bool paused_ = false;
   bool running_ = false;
-  unsigned int last_portal_switch_ = 0;
-  unsigned int last_portal_fired_ = 0;
   unsigned int current_frame_ = 0;
   int hearts_;
   sf::Texture heart_texture_;
@@ -60,12 +57,7 @@ class Game {
                   const tmx::ObjectGroup &advancement_layer,
                   const tmx::Map &map);
 
-  void sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
-                const tmx::Map &map);
   void SpawnPlayer();
-  void UpdateStandbyPortal();
-  void UpdateMidairPortals();
-  void firePortal();
   bool aabbCollisionCheck(BoundingBox &first, BoundingBox &second);
   void HandleEntitiesCollision(std::shared_ptr<Entity> e1,
                                std::shared_ptr<Entity> e2);
@@ -102,4 +94,4 @@ public:
   void Run();
 };
 
-#endif // !PORTAL2D_GAME_H_
+#endif // !MARIO_GAME_H_

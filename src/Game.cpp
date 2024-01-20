@@ -21,13 +21,12 @@
 #define DEFAULT_PLAYER_HORIZONTAL_VELOCITY 2
 #define PLAYER_JUMP_VELOCITY 5
 #define FRAMERATE_LIMIT 240
-#define PORTAL_VELOCITY 15
 #define GRAVITY_ACCELERATION 0.1f
 
 Game::Game() {
   entities_ = std::make_shared<EntityManager>();
   window_ =
-      std::make_shared<sf::RenderWindow>(sf::VideoMode(1280, 720), "Portal 2D");
+      std::make_shared<sf::RenderWindow>(sf::VideoMode(1280, 720), "Mario Jump");
   current_level_index_ = 0;
   paused_ = true;
   running_ = false;
@@ -73,7 +72,7 @@ void Game::Init() {
   paused_ = false;
   running_ = true;
   current_frame_ = 0;
-  window_->create(sf::VideoMode(1280, 720), "Portal 2D");
+  window_->create(sf::VideoMode(1280, 720), "Mario Jump");
   window_->setFramerateLimit(FRAMERATE_LIMIT);
   current_frame_ = 0;
 
@@ -82,7 +81,6 @@ void Game::Init() {
   DEBUGLOG("Initialization finished")
 }
 
-#define PORTALLABLE_LAYER "Portallable"
 #define COLLISION_LAYER "Collision"
 #define DEATH_LAYER "Death"
 #define LEVEL_ADVANCEMENT_LAYER "NextLevel"
@@ -99,11 +97,6 @@ void Game::Run() {
     }
     sMovement();
     const auto &layers = map_.getLayers();
-    for (const auto &layer : layers) {
-      if (layer->getName() == PORTALLABLE_LAYER) {
-        sPortals(layer, map_);
-      }
-    }
     tmx::ObjectGroup collision_layer;
     tmx::ObjectGroup death_layer;
     tmx::ObjectGroup advancement_layer;
@@ -159,7 +152,6 @@ void Game::DrawInput() {
       << ", R: " << std::boolalpha << player_->cInput->right_
       << ", J: " << std::boolalpha << player_->cInput->jump_
       << ", F: " << std::boolalpha << player_->cInput->fire_
-      << ", S: " << std::boolalpha << player_->cInput->switch_portal_
       << ", U: " << std::boolalpha << player_->cInput->up_
       << ", MA: " << std::boolalpha << player_->midair();
   DrawText(oss.str(), sf::Vector2f(0, 0), 24);
@@ -185,21 +177,6 @@ void Game::RenderEntityOutline(std::shared_ptr<Entity> e) {
   outline.setOutlineColor(sf::Color::Black);
   outline.setOutlineThickness(1.0f);
   window_->draw(outline);
-}
-
-void Game::sPortals(const std::unique_ptr<tmx::Layer> &portallable_layer,
-                    const tmx::Map &map) {
-
-  const auto &portallable_object_group =
-      portallable_layer->getLayerAs<tmx::ObjectGroup>();
-  for (auto e : entities_->getEntities("midair_portal")) {
-    auto colliding_objects = GetObjGroupColliders(e, portallable_object_group);
-    std::vector<Collider> colliders;
-    for (auto obj : colliding_objects) {
-      auto collider = IdentifyCollider(e, obj);
-      colliders.push_back(collider);
-    }
-  }
 }
 
 void Game::sCollision(const tmx::ObjectGroup &collision_layer,
@@ -410,10 +387,8 @@ bool Game::ShouldPlaceStandingEntityOnCollider(
 }
 
 void Game::HandleEntitiesCollision(std::shared_ptr<Entity> e1,
-                                   std::shared_ptr<Entity> e2) {
-  if (e1->tag() != "standby_portal" && e2->tag() != "standby_portal") {
+                                   std::shared_ptr<Entity> e2) {  
     DEBUGLOG(e1->tag() << " is colliding with " << e2->tag())
-  }
 }
 
 void Game::sUserInput(sf::Event event) {
@@ -427,12 +402,6 @@ void Game::sUserInput(sf::Event event) {
     break;
   case sf::Keyboard::Up:
     player_->cInput->up_ = event.type == sf::Event::KeyPressed;
-    break;
-  case sf::Keyboard::F:
-    player_->cInput->fire_ = event.type == sf::Event::KeyPressed;
-    break;
-  case sf::Keyboard::C:
-    player_->cInput->switch_portal_ = event.type == sf::Event::KeyPressed;
     break;
   case sf::Keyboard::Space:
     player_->cInput->jump_ = event.type == sf::Event::KeyPressed;
@@ -457,60 +426,18 @@ void Game::sMovement() {
     player_->transform_->velocity_.y = -PLAYER_JUMP_VELOCITY;
   }
 
-  if (player_->cInput->fire_) {
-    firePortal();
-  }
-
   for (auto e : entities_->getEntities()) {
     e->transform_->pos_ += e->transform_->velocity_;
     if (e->affected_by_gravity() && e->midair()) {
       e->transform_->velocity_.y += GRAVITY_ACCELERATION;
     }
   }
-  UpdateStandbyPortal();
 }
 
-void Game::UpdateStandbyPortal() {
-  return;
-  int x_offset = player_->bb().width + sbportal_->bb().width / 2.25f;
-  if (player_->transform_->flipped_) {
-    x_offset -= player_->bb().width;
-    x_offset *= -1;
-  }
-  sbportal_->transform_->flipped_ = player_->transform_->flipped_;
-  Vec2 sbportal_pos;
-  sbportal_pos.x = player_->bb().left + x_offset;
-  sbportal_pos.y = player_->bb().top + player_->bb().height / 2.f;
-  sbportal_->transform_->pos_ = sbportal_pos;
-
-  if (player_->cInput->switch_portal_ &&
-      current_frame_ > last_portal_switch_ + FRAMERATE_LIMIT / 10) {
-    last_portal_switch_ = current_frame_;
-    sbportal_->AlternateColor();
-  }
-}
 
 void Game::SpawnPlayer() {
   player_ = entities_->addPlayer();
   player_->transform_->pos_ = SpawnPoint;
-  // sbportal_ = entities_->addEntity<StandbyPortal>();
-}
-
-void Game::firePortal() {
-  if (last_portal_fired_ + PORTAL_COOLDOWN_TICKS > current_frame_) {
-    return;
-  }
-  last_portal_fired_ = current_frame_;
-  auto portal = entities_->addEntity<MidairPortal>();
-  portal->transform_->pos_ = sbportal_->transform_->pos_;
-  portal->transform_->velocity_ = Vec2(PORTAL_VELOCITY, 0);
-  if (portal->portal_color() != sbportal_->portal_color()) {
-    portal->AlternateColor();
-  }
-
-  if (player_->transform_->flipped_) {
-    portal->transform_->velocity_ *= -1;
-  }
 }
 
 void Game::RenderHearts() {

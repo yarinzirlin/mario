@@ -1,5 +1,5 @@
-#ifndef PORTAL2D_COMPONENTS_H_
-#define PORTAL2D_COMPONENTS_H_
+#ifndef MARIO_COMPONENTS_H_
+#define MARIO_COMPONENTS_H_
 
 #include "Vec2.hpp"
 
@@ -32,7 +32,6 @@ public:
   bool right_ = false;
   bool left_ = false;
   bool fire_ = false;
-  bool switch_portal_ = false;
   bool jump_ = false;
 
   CInput() {}

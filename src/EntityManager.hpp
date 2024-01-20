@@ -1,7 +1,7 @@
 // This file contains the implementation of [specific functionality]
 
-#ifndef PORTAL2D_ENTITYMANAGER_H_
-#define PORTAL2D_ENTITYMANAGER_H_
+#ifndef MARIO_ENTITYMANAGER_H_
+#define MARIO_ENTITYMANAGER_H_
 
 #include "Entity.hpp"
 #include <map>
