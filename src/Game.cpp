@@ -32,8 +32,18 @@ Game::Game() {
   paused_ = true;
   running_ = false;
   hearts_ = 3;
+
+  background_texture_.loadFromFile("assets/backgrounds/retro.png");
+  background_sprite_.setTexture(background_texture_);
+
   font_.loadFromFile("assets/fonts/arial.ttf");
   auto window_size = window_->getSize();
+
+// Scale the sprite to fit the window
+  background_sprite_.setScale(
+    float(window_size.x) / background_texture_.getSize().x,
+    float(window_size.y) / background_texture_.getSize().y
+);
   sf::Image heart_img;
   heart_img.loadFromFile("assets/general/heart.png");
   heart_sprites_ = {std::make_shared<sf::Sprite>(),
@@ -115,6 +125,7 @@ void Game::Run() {
 void Game::sRender() {
   window_->clear();
   MapLayer layerZero(map_, 0);
+  window_->draw(background_sprite_);
   window_->draw(layerZero);
   for (auto e : entities_->getEntities()) {
     e->UpdateAnimation(current_frame_);
@@ -135,6 +146,7 @@ void Game::sRender() {
     RenderEntityOutline(e);
     DrawInput();
 #endif
+    
     window_->draw(*e->sprite());
   }
   RenderHearts();
