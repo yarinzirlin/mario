@@ -41,3 +41,4 @@ bin/*
 
 mario
 mario.dSYM/*
+*.db

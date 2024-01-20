@@ -2,7 +2,6 @@
 
 #include "EntityManager.hpp"
 #include "Utils.hpp"
-#include <__algorithm/remove_if.h>
 #include <iostream>
 #include <iterator>
 #include <memory>

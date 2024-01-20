@@ -9,6 +9,7 @@
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/Types.hpp>
+#include <math.h>
 
 #if DEBUG
 #define DEBUGLOG(x)                                                            \
