@@ -51,6 +51,10 @@ Game::Game() {
             (i * heart_sprites_[i]->getGlobalBounds().width),
         window_size.y / 100.f);
   }
+
+  game_progress_ = std::make_shared<GameProgress>();
+  game_progress_->loadProgress(current_level_index_, hearts_);
+
   Init();
 }
 
@@ -62,12 +66,6 @@ void Game::Init() {
   window_->create(sf::VideoMode(1280, 720), "Portal 2D");
   window_->setFramerateLimit(FRAMERATE_LIMIT);
   current_frame_ = 0;
-
-  // background_texture_.loadFromFile("resources/backgrounds/4.png");
-  // background_sprite_.setTexture(background_texture_);
-  // background_sprite_.setScale(
-  //     window_->getSize().x / background_sprite_.getLocalBounds().width,
-  // window_->getSize().y / background_sprite_.getLocalBounds().height);
 
   map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
   SpawnPlayer();
@@ -117,9 +115,7 @@ void Game::Run() {
 void Game::sRender() {
   window_->clear();
   MapLayer layerZero(map_, 0);
-  // MapLayer layerOne(map, 1);
   window_->draw(layerZero);
-  // m_window->draw(layerOne);
   for (auto e : entities_->getEntities()) {
     e->UpdateAnimation(current_frame_);
     e->sprite()->setPosition(e->transform_->pos_.x, e->transform_->pos_.y);
@@ -295,9 +291,10 @@ void Game::HandleEntityCollisionWithDeathLayer(
     entity->transform_->pos_ = SpawnPoint;
     entity->transform_->velocity_ = {0.0, 0.0};
     hearts_--;
+    game_progress_->saveProgress(current_level_index_, hearts_);
   }
 
-  if (hearts_ == 0) {
+  if (hearts_ <= 0) {
     ResetGame();
   }
 }
@@ -308,7 +305,11 @@ void Game::HandleEntityCollisionWithAdvancementLayer(
   if (current_level_index_ >= levels_.size()) {
     current_level_index_ = 0;
     hearts_ = 3;
+    
   }
+  game_progress_->saveProgress(current_level_index_, hearts_);
+
+  
   auto next_level_path =
       "assets/maps/" + std::string(levels_[current_level_index_]);
   DEBUGLOG(next_level_path)
@@ -331,11 +332,13 @@ void Game::HandleEntityCollisionWithMap(const std::shared_ptr<Entity> entity,
 
     break;
 
+  // Handling top collision
   case Top:
     entity->transform_->pos_.y = collider.collidingObject.getAABB().top +
                                  collider.collidingObject.getAABB().height;
     entity->transform_->velocity_.y = 0;
     break;
+  // Handling bottom collision
   case Bottom:
     entity->transform_->pos_.y =
         collider.collidingObject.getAABB().top - entity->bb().height;
@@ -506,5 +509,6 @@ void Game::RenderHearts() {
 void Game::ResetGame() {
   hearts_ = 3;
   current_level_index_ = 0;
+  game_progress_->saveProgress(current_level_index_, hearts_);
   map_.load("assets/maps/" + std::string(levels_[current_level_index_]));
 }

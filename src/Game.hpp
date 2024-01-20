@@ -13,6 +13,7 @@
 #include <tmxlite/Layer.hpp>
 #include <tmxlite/Object.hpp>
 #include <tmxlite/ObjectGroup.hpp>
+#include "GameProgress.hpp"
 
 #define PORTAL_COOLDOWN_TICKS 60
 
@@ -41,10 +42,11 @@ class Game {
   unsigned int last_portal_switch_ = 0;
   unsigned int last_portal_fired_ = 0;
   unsigned int current_frame_ = 0;
-  unsigned int hearts_;
+  int hearts_;
   sf::Texture heart_texture_;
   std::vector<std::shared_ptr<sf::Sprite>> heart_sprites_;
   sf::Font font_;
+  std::shared_ptr<GameProgress> game_progress_;
 
   void sMovement();
   void sUserInput(sf::Event event);

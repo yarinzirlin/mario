@@ -1,3 +1,5 @@
+// This file contains the implementation of [specific functionality]
+
 #include "EntityManager.hpp"
 #include "Utils.hpp"
 #include <__algorithm/remove_if.h>
@@ -33,7 +35,8 @@ void EntityManager::update() {
   }
 #endif
 
-  for (auto e : entities_) {
+  // Iterating through each entity for updates
+for (auto e : entities_) {
     e->set_prev_bb(e->bb());
   }
   to_add_.clear();
